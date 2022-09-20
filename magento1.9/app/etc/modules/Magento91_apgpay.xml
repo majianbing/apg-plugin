@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * E: test@test.com
+ * W:www.magento.con
+ */
+-->
+<config>
+    <modules>
+        <Magento91_apgpay>
+            <active>true</active>
+            <codePool>local</codePool>
+            <depends>
+                <Mage_Payment/>
+            </depends>
+        </Magento91_apgpay>
+    </modules>
+</config>
