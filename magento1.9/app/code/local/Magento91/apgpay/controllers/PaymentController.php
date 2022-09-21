@@ -1,24 +1,24 @@
 <?php
 /**
- * E: test@test.com
+ * E: sales@gloprocessor.com
  * W:www.magento.con
  */
  
-class Magento91_apgpay_PaymentController extends Mage_Core_Controller_Front_Action
+class Magento91_Apgpay_PaymentController extends Mage_Core_Controller_Front_Action
 {
 	/**
 	 * Order instance
 	 */
 	protected $_order;
 	protected $_tradeNo;
-		//∆ΩÃ®Ωª“◊∫≈
+		//∆ΩÃ®ÔøΩÔøΩÔøΩ◊∫ÔøΩ
 	protected $_orderNo;
-		//Õ®÷™ ±º‰
+		//Õ®÷™ ±ÔøΩÔøΩ
 	protected $_notifyTime;
 	
-		//÷ß∏∂◊¥Ã¨
+		//÷ßÔøΩÔøΩ◊¥Ã¨
 	protected $_tradeStatus;
-		//«©√˚¿‡–Õ
+		//«©ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ
 	protected $_signType;
 		//◊¥Ã¨
 	protected $_success;
@@ -57,7 +57,7 @@ class Magento91_apgpay_PaymentController extends Mage_Core_Controller_Front_Acti
 
 		$order->addStatusToHistory(
 		$order->getStatus(),
-		Mage::helper('apgpay')->__('Customer was redirected to apgpay')
+		Mage::helper('apgpay')->__('Customer was redirected to APG')
 		);
 		$order->save();
 		//$order->sendNewOrderEmail();
@@ -94,31 +94,31 @@ class Magento91_apgpay_PaymentController extends Mage_Core_Controller_Front_Acti
 			$model->generateErrorResponse();
 		}
 		
-		//∂©µ•∫≈
+		//ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ
 		$tradeNo = $rData["tradeNo"];
-		//∆ΩÃ®Ωª“◊∫≈
+		//∆ΩÃ®ÔøΩÔøΩÔøΩ◊∫ÔøΩ
 		$orderNo = $rData["orderNo"];
-		//Õ®÷™ ±º‰
+		//Õ®÷™ ±ÔøΩÔøΩ
 		$notifyTime = $rData["notifyTime"];
-		//÷ß∏∂◊¥Ã¨
+		//÷ßÔøΩÔøΩ◊¥Ã¨
 		$tradeStatus = $rData["tradeStatus"];
-		//«©√˚¿‡–Õ
+		//«©ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ
 		$signType = $rData["signType"];
 		//◊¥Ã¨
 		$success = $rData["success"];
-		//«©√˚
+		//«©ÔøΩÔøΩ
 		$sign = $rData["sign"];
 		//md5
 	    $MD5key = $model->getConfigData('md5_msg');
 		
 		$this->_tradeNo = $tradeNo;
-			//∆ΩÃ®Ωª“◊∫≈
+			//∆ΩÃ®ÔøΩÔøΩÔøΩ◊∫ÔøΩ
 		$this->_orderNo = $orderNo;
-			//Õ®÷™ ±º‰
+			//Õ®÷™ ±ÔøΩÔøΩ
 		$this->_notifyTime = $notifyTime;
-			//÷ß∏∂◊¥Ã¨
+			//÷ßÔøΩÔøΩ◊¥Ã¨
 		$this->_tradeStatus = $tradeStatus;
-			//«©√˚¿‡–Õ
+			//«©ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ
 		$this->_signType = $signType;
 			//◊¥Ã¨
 		$this->_success = $success;
@@ -139,14 +139,12 @@ class Magento91_apgpay_PaymentController extends Mage_Core_Controller_Front_Acti
 		
 		$sourcestr = substr($sourcestr,0,strlen($sourcestr)-1);
 		$myhis = $sourcestr;
-		//echo "‘≠¥Æ:<input type=text value='".$sourcestr ."' />";
+
 		$sourcestr .= $MD5key;
-		//echo "º”√‹¥Æ:<input type=text value='".$sourcestr ."' />";
-		//echo "md5:<input type=text value='". $MD5key ."' /><br>";
+
 		$myjm = md5($sourcestr);
-		//echo "<br>";
-		//echo $sign;
-		$this->writeLog('./apgpaylog.txt',date('Y-m-d H:i:s').'---'.'Customer back from apgpay:'.$myhis);
+
+		$this->writeLog('./apgpaylog.txt',date('Y-m-d H:i:s').'---'.'Customer back from APG:'.$myhis);
 		if ($sign == $myjm && $tradeStatus<>'TRADE_CLOSE'){
 			return true;
 		}else{
@@ -161,7 +159,7 @@ public function writeLog($file,$msg){
 	
  /**
 	 *  Success payment page
-	 *
+	 *  ÔøΩÿµÔøΩÔøΩÔøΩ÷∑
 	 *  @param    none
 	 *  @return	  void
 	 */
@@ -182,53 +180,39 @@ public function writeLog($file,$msg){
 		}
 		
 		
-		//∂©µ•∫≈
-		$order_no= $rData["order_no"];
+		//ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ
+        $merOrderNo= $rData["merOrderNo"];
 		
-		$order = Mage::getModel('sales/order')->loadByIncrementId($order_no);
+		$order = Mage::getModel('sales/order')->loadByIncrementId($merOrderNo);
 		if (!$order){
 			die('wrong orderno');
 		}
 		
-		$hash = $rData["hash"];
-		$amount = $rData["amount"];
+		$hash = $rData["sign"];
+		$amount = $rData["payAmount"];
 		$failure_reason = $rData["failure_reason"];
-		$trans_date = $rData["trans_date"];
+		$tranCode = $rData["tranCode"];
 		$trans_time = $rData["trans_time"];
-		$status = $rData["status"];
+		$respStatus = $rData["respStatus"];
 		$ref_no = $rData["ref_no"];
-		$invoice_id = $rData["invoice_id"];		
-		$merchant_id = $rData["merchant_id"];
-		$order_no = $rData["order_no"];
+        $referenceNo = $rData["referenceNo"];
+		$merchant_id = $rData["merchantNo"];
 		
 		//◊¥Ã¨
-		$currency = $rData["currency"];
-		//«©√˚
+		$payCurrency = $rData["payCurrency"];
+		//«©ÔøΩÔøΩ
 		
 		//md5
 	    $MD5key = $model->getConfigData('md5_msg');
-		
-		$jmyc =  $MD5key.$amount.$currency.$failure_reason.$invoice_id.$merchant_id.$order_no.$ref_no.$status.$trans_date.$trans_time;
-		$jmh = hash('sha256', $jmyc);
-		/*echo $jmyc;
-		echo "<br>";
-		$jmh = hash('sha256', $jmyc);
-		echo $hash;
-		echo "<br>";
-		echo $jmh;
-		echo "<br>";*/
-		//var_dump($order->getPayment());exit;
-		if (strtoupper($jmh) == $hash){
 
-			/*
-				if (...){
-					$this->_redirect('checkout/onepage/success');
-				}else{
-				$this->_redirect('checkout/onepage/failure');
-				}
-			*/
-			
-			if ($status == '01'){
+		$befor_sign =  $merOrderNo.$referenceNo.$payCurrency.$respStatus.$MD5key;
+
+        $jmh2 = hash('sha512', $befor_sign);
+		//var_dump($order->getPayment());exit;
+		if (strtolower($jmh2) == $hash){
+
+			// = 1
+			if ($respStatus == '1'){
 				if ($order->state <> $model->getConfigData('order_status_payment_success')){
 				  $order->addStatusToHistory(
 						$model->getConfigData('order_status_payment_success'),//$order->getStatus(),
@@ -241,11 +225,11 @@ public function writeLog($file,$msg){
 					$this->_redirect('checkout/onepage/success');
 					
 			}
-			if ($status == '02'){
+			if ($respStatus == '0' || $respStatus == '3'){
 				if ($order->state <> Mage_Sales_Model_Order::STATE_CANCELED){
 					$order->addStatusToHistory(
 						Mage_Sales_Model_Order::STATE_CANCELED,//$order->getStatus(),
-						Mage::helper('apgpay')->__('Payment failed by apgpay!reason:'.$failure_reason)
+						Mage::helper('apgpay')->__('Payment failed by APG!reason:'.$failure_reason)
 					);
 					$order->setState(Mage_Sales_Model_Order::STATE_CANCELED, true);
 					$order->save();
@@ -253,17 +237,22 @@ public function writeLog($file,$msg){
 					$this->_redirect('checkout/onepage/failure');
 					
 			}
-			if ($status == '00'){
+			if ($respStatus == '2'){
 				
 					$this->_redirect('checkout/onepage/success');
 					
 			}
 		}else{
 			$this->_redirect('checkout/onepage/failure');
-			
+			echo "sign check failed \n";
+			echo $jmh2. "\n";
+			echo $hash.  "\n";
 		}
 	}
-	
+
+    /**
+     * ÔøΩÏ≤ΩÕ®÷™
+     */
 	public function notifyAction()
 	{
 	   $model = Mage::getModel('apgpay/payment');
@@ -281,55 +270,41 @@ public function writeLog($file,$msg){
 		}
 		
 		
-		//∂©µ•∫≈
-		$order_no= $rData["order_no"];
+		//ÔøΩÔøΩÔøΩÔøΩÔøΩÔøΩ
+        $merOrderNo= $rData["merOrderNo"];
 		
-		$order = Mage::getModel('sales/order')->loadByIncrementId($order_no);
+		$order = Mage::getModel('sales/order')->loadByIncrementId($merOrderNo);
 		if (!$order){
 			die('wrong orderno');
 		}
-		
-		$hash = $rData["hash"];
+
+        $hash = $rData["sign"];
 		$amount = $rData["amount"];
 		$failure_reason = $rData["failure_reason"];
 		$trans_date = $rData["trans_date"];
 		$trans_time = $rData["trans_time"];
-		$status = $rData["status"];
+		$respStatus = $rData["respStatus"];
 		$ref_no = $rData["ref_no"];
-		$invoice_id = $rData["invoice_id"];		
+		$referenceNo = $rData["referenceNo"];
 		$merchant_id = $rData["merchant_id"];
-		$order_no = $rData["order_no"];
 		
 		//◊¥Ã¨
-		$currency = $rData["currency"];
-		//«©√˚
+		$payCurrency = $rData["payCurrency"];
+		//«©ÔøΩÔøΩ
 		
 		//md5
 	    $MD5key = $model->getConfigData('md5_msg');
-		
-		$jmyc =  $MD5key.$amount.$currency.$failure_reason.$invoice_id.$merchant_id.$order_no.$ref_no.$status.$trans_date.$trans_time;
-		$jmh = hash('sha256', $jmyc);
-		/*echo $jmyc;
-		echo "<br>";
-		$jmh = hash('sha256', $jmyc);
-		echo $hash;
-		echo "<br>";
-		echo $jmh;
-		echo "<br>";*/
-		//var_dump($order->getPayment());exit;
-		if (strtoupper($jmh) == $hash){
-			/*
-				if (...){
-					$this->_redirect('checkout/onepage/success');
-				}else{
-				$this->_redirect('checkout/onepage/failure');
-				}
-			*/
-			if ($status == '01'){
+
+        $befor_sign =  $merOrderNo.$referenceNo.$payCurrency.$respStatus.$MD5key;
+		$jmh = hash('sha512', $befor_sign);
+
+		if (strtolower($jmh) == $hash){
+
+			if ($respStatus == '1'){
 				if ($order->state <> $model->getConfigData('order_status_payment_success')){
 				  $order->addStatusToHistory(
 						$model->getConfigData('order_status_payment_success'),//$order->getStatus(),
-						Mage::helper('apgpay')->__('Payment success by apgpay!')
+						Mage::helper('apgpay')->__('Payment success by APG!')
 					);
 					$order->setState($model->getConfigData('order_status_payment_success'), true);
 					$order->save();
@@ -338,11 +313,11 @@ public function writeLog($file,$msg){
 					echo "success";
 					exit;
 			}
-			if ($status == '02'){
+			if ($respStatus == '0'){
 				if ($order->state <> Mage_Sales_Model_Order::STATE_CANCELED){
 					$order->addStatusToHistory(
 						Mage_Sales_Model_Order::STATE_CANCELED,//$order->getStatus(),
-						Mage::helper('apgpay')->__('Payment failed by apgpay!reason:'.$failure_reason)
+						Mage::helper('apgpay')->__('Payment failed by APG!reason:'.$failure_reason)
 					);
 					$order->setState(Mage_Sales_Model_Order::STATE_CANCELED, true);
 					$order->save();
@@ -350,7 +325,7 @@ public function writeLog($file,$msg){
 					echo "success";
 					exit;
 			}
-			if ($status == '00'){
+			if ($respStatus == '2'){
 				
 					echo "success";
 					exit;
@@ -360,6 +335,7 @@ public function writeLog($file,$msg){
 			exit;	
 		}
 	}
+
 	protected function saveInvoice(Mage_Sales_Model_Order $order)
     {    
         if ($order->canInvoice() && !$order->hasInvoices()) {

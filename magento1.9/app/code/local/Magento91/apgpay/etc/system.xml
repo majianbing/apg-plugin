@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <!--
 /**
- * E: test@test.com
+ * E: sales@gloprocessor.com
  * W:www.magento.con
  */
 -->
@@ -10,7 +10,7 @@
         <payment>
             <groups>
                 <apgpay_payment module="apgpay">
-                    <label>91Magento apgpay Payment</label>
+                    <label>Magento193 APG Payment</label>
                     <frontend_type>text</frontend_type>
                     <sort_order>310</sort_order>
                     <show_in_default>1</show_in_default>
@@ -84,7 +84,7 @@
                             <show_in_store>0</show_in_store>
 		                </order_status>
 						<order_status_payment_success translate="label">
-                            <label>Order status when payment success by apgpay</label>
+                            <label>Order status when payment success by APG</label>
                             <frontend_type>select</frontend_type>
                             <source_model>adminhtml/system_config_source_order_status</source_model>
                             <sort_order>91</sort_order>
@@ -110,7 +110,7 @@
 								<![CDATA[
 								 	<strong><font color="red">
 									跳转时的描述信息,支持html
-									You will be redirected to the apgpay website in a few seconds.
+									You will be redirected to the APG website in a few seconds.
 								 </font></strong>
                                 ]]>
                             </comment>

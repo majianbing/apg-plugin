@@ -1,10 +1,10 @@
-﻿<?php
+<?php
 
 /**
  * E: jj632293@gmail.com
  * W:www.91magento.net
  */
-class Magento91_apgpay_Model_Payment extends Mage_Payment_Model_Method_Abstract
+class Magento91_Apgpay_Model_Payment extends Mage_Payment_Model_Method_Abstract
 {
     protected $_code = 'apgpay_payment';
     protected $_formBlockType = 'apgpay/form';
@@ -107,6 +107,7 @@ class Magento91_apgpay_Model_Payment extends Mage_Payment_Model_Method_Abstract
         //$sourcestr = $md5 . $address_line . $amount . $buyer_email . $city . $country . $currency . $first_name . $invoice_id . $last_name . $merchant_id . $order_no . $product_name . $product_price . $product_quantity . $remark . $return_url . $shipping_country . $state . $zipcode;
 
         $sourcestr = $md5 . $amount . $currency . $invoice_id . $merchant_id;
+        $sourcestr_2 = $merchant_id . $invoice_id . $currency . $amount . $return_url . $md5;
         //echo "加密串:<input type=text value='".$sourcestr ."' />";
         //echo $sourcestr;
         //echo "<br>";
@@ -114,14 +115,18 @@ class Magento91_apgpay_Model_Payment extends Mage_Payment_Model_Method_Abstract
         //exit;
         $hash = hash('sha256', $sourcestr);
 
-        $submitdatas['merchant_id'] = $merchant_id;
-        $submitdatas["invoice_id"] = $invoice_id;
+        $hash2 = hash('sha512', $sourcestr_2);
+
+        $submitdatas['merchantNo'] = $merchant_id;
+        $submitdatas["merOrderNo"] = $invoice_id;
         $submitdatas["order_no"] = $order_no;
-        $submitdatas["currency"] = $currency;
-        $submitdatas["amount"] = $amount;
-        $submitdatas["buyer_email"] = $buyer_email;
-        $submitdatas["return_url"] = $return_url;
-        $submitdatas["notify_url"] = $notifyUrl;
+        $submitdatas["payCurrency"] = $currency;
+        $submitdatas["payAmount"] = $amount;
+        $submitdatas["email"] = $buyer_email;
+        $submitdatas["returnUrl"] = $return_url;
+        $submitdatas["notifyUrl"] = $notifyUrl;
+        $submitdatas["tranCode"] = "TA002";
+        $submitdatas["goods"] = "[{\"name\":\"producet\",\"price\":\"1.01\",\"nums\":10}]";
         $submitdatas["remark"] = $remark;
         $submitdatas["shipping_country"] = $shipping_country;
         $submitdatas["first_name"] = $first_name;
@@ -135,6 +140,7 @@ class Magento91_apgpay_Model_Payment extends Mage_Payment_Model_Method_Abstract
         $submitdatas["state"] = $state;
         $submitdatas["zipcode"] = $zipcode;
         $submitdatas["hash"] = strtoupper($hash);
+        $submitdatas["sign"] = strtoupper($hash2);
         return $submitdatas;
     }
 }

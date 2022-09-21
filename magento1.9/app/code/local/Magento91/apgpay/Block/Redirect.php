@@ -1,9 +1,9 @@
 <?php
 /**
- * E: test@test.com
+ * E: sales@gloprocessor.com
  * W:www.magento.con
  */
-class Magento91_apgpay_Block_Redirect extends Mage_Core_Block_Abstract
+class Magento91_Apgpay_Block_Redirect extends Mage_Core_Block_Abstract
 {
 	
 	protected function _toHtml()

@@ -1,30 +1,30 @@
 <?xml version="1.0"?>
 <!--
 /**
- * E: test@test.com
+ * E: sales@gloprocessor.com
  * W:www.magento.con
  */
 -->
 <config>
     <modules>
-        <Magento91_apgpay>
+        <Magento91_Apgpay>
             <version>0.9.0</version>
-        </Magento91_apgpay>
+        </Magento91_Apgpay>
     </modules>
     <global>
 		
 		  <helpers>
 		  	   <apgpay>
-		  	   	   <class>Magento91_apgpay_Helper</class>
+		  	   	   <class>Magento91_Apgpay_Helper</class>
 		  	   </apgpay>
 		  </helpers>		
         <models>
             <apgpay>
-                <class>Magento91_apgpay_Model</class>
+                <class>Magento91_Apgpay_Model</class>
                 <resourceModel>apgpay_mysql4</resourceModel>
             </apgpay>
             <apgpay_mysql4>
-                <class>Magento91_apgpay_Model_Mysql4</class>
+                <class>Magento91_Apgpay_Model_Mysql4</class>
                 <entities>
                     <api_debug><table>apgpay_api_debug</table></api_debug>
                 </entities>
@@ -33,8 +33,8 @@
         <resources>
             <apgpay_setup>
                 <setup>
-                    <module>Magento91_apgpay</module>
-                    <class>Magento91_apgpay_Model_Mysql4_Setup</class>
+                    <module>Magento91_Apgpay</module>
+                    <class>Magento91_Apgpay_Model_Mysql4_Setup</class>
                 </setup>
                 <connection>
                     <use>core_setup</use>
@@ -52,7 +52,7 @@
             </apgpay_read>
         </resources>
         <blocks>
-            <apgpay><class>Magento91_apgpay_Block</class></apgpay>
+            <apgpay><class>Magento91_Apgpay_Block</class></apgpay>
     	</blocks>
     </global>
     <frontend>
@@ -63,18 +63,18 @@
             <apgpay>
                 <use>standard</use>
                 <args>
-                    <module>Magento91_apgpay</module>
+                    <module>Magento91_Apgpay</module>
                     <frontName>apgpay</frontName>
                 </args>
             </apgpay>
         </routers>
         <translate>
             <modules>
-                <Magento91_apgpay>
+                <Magento91_Apgpay>
                     <files>
-                        <default>Magento91_apgpay.csv</default>
+                        <default>Magento91_Apgpay.csv</default>
                     </files>
-                </Magento91_apgpay>
+                </Magento91_Apgpay>
             </modules>
         </translate>
         <layout>
@@ -88,11 +88,11 @@
     <adminhtml>
         <translate>
             <modules>
-                <Magento91_apgpay>
+                <Magento91_Apgpay>
                     <files>
-                        <default>Magento91_apgpay.csv</default>
+                        <default>Magento91_Apgpay.csv</default>
                     </files>
-                </Magento91_apgpay>
+                </Magento91_Apgpay>
             </modules>
         </translate>
     </adminhtml>
@@ -100,7 +100,7 @@
         <payment>
             <apgpay_payment>
                   <model>apgpay/payment</model>
-                  <title>apgpay Payment Gateway</title>
+                  <title>APG Payment Gateway</title>
                   <allowspecific>0</allowspecific>
                   <transaction_type>O</transaction_type>
             </apgpay_payment>

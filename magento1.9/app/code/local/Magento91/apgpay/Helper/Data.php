@@ -1,9 +1,9 @@
 <?php
 /**
- * E: test@test.com
+ * E: sales@gloprocessor.com
  * W:www.magento.con
  */
-class Magento91_apgpay_Helper_Data extends Mage_Core_Helper_Abstract
+class Magento91_Apgpay_Helper_Data extends Mage_Core_Helper_Abstract
 {
 
 }
