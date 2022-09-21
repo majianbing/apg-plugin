@@ -59,11 +59,9 @@ class Magento91_Apgpay_Model_Payment extends Mage_Payment_Model_Method_Abstract
 
         $merchant_id = $this->getConfigData('merchantid');//合作伙伴ID
 
-
         $order_no = $invoice_id = $orderIncrementId;
 
         $currency = $order->getOrderCurrencyCode();//支付币种
-
 
         $amount = sprintf('%.2f', $order->getGrandTotal());//交易金额
 
@@ -71,12 +69,9 @@ class Magento91_Apgpay_Model_Payment extends Mage_Payment_Model_Method_Abstract
         $amount = sprintf('%.2f', $storeCurrency->convert($order->getGrandTotal(), 'USD'));
         $buyer_email = $order->getData('customer_email'); //账单地址用户邮箱
 
-
         $return_url = $errorNotifyUrl = Mage::getUrl('apgpay/payment/return', array('_secure' => true));
         $remark = Mage::getStoreConfig("web/unsecure/base_url") . ":" . $order_no;
         //$this->getConfigData ("notifyurl");//页面跳转同步通知页面路
-        //$errorNotifyUrl = Mage::getUrl ( 'apgpay/payment/return', array ('_secure' => true ));	//请求出错时的通知页面路径
-        //$notifyUrl = Mage::getUrl ( 'apgpay/payment/notify', array ('_secure' => true ));	//服务器异步通知页面路径
         $configInfomations = Mage::getModel('apgpay/payment');
         $notifyUrl = $configInfomations->getConfigData('notifyurl');    //服务器异步通知页面路径
         $billingAddress = $order->getBillingAddress();
@@ -85,11 +80,8 @@ class Magento91_Apgpay_Model_Payment extends Mage_Payment_Model_Method_Abstract
         $first_name = trim($billingAddress->getFirstname());//	账单地址用户姓
         $last_name = trim($billingAddress->getLastname());//账单地址用户名
         $zipcode = $billingAddress->getPostcode();//账单邮编
-        //foreach ($order->getAllItems () as $item ) {
 
         $product_name = 'product-' . $order_no;//商品名称
-        //$product_name = str_replace('"',"",$product_name);//商品名称
-        //$product_name = str_replace('&',"",$product_name);//商品名称
 
         $product_quantity = 1;//商品数量
         $product_price = $amount;//商品单价
@@ -104,16 +96,8 @@ class Magento91_Apgpay_Model_Payment extends Mage_Payment_Model_Method_Abstract
         $billToState = trim($billingAddress->getRegion());//账单地址国家
 
         $md5 = $this->getConfigData('md5_msg');
-        //$sourcestr = $md5 . $address_line . $amount . $buyer_email . $city . $country . $currency . $first_name . $invoice_id . $last_name . $merchant_id . $order_no . $product_name . $product_price . $product_quantity . $remark . $return_url . $shipping_country . $state . $zipcode;
 
-        $sourcestr = $md5 . $amount . $currency . $invoice_id . $merchant_id;
         $sourcestr_2 = $merchant_id . $invoice_id . $currency . $amount . $return_url . $md5;
-        //echo "加密串:<input type=text value='".$sourcestr ."' />";
-        //echo $sourcestr;
-        //echo "<br>";
-        //echo "md5:<input type=text value='". $this->getConfigData ('md5_msg') ."' />";
-        //exit;
-        $hash = hash('sha256', $sourcestr);
 
         $hash2 = hash('sha512', $sourcestr_2);
 
@@ -125,8 +109,9 @@ class Magento91_Apgpay_Model_Payment extends Mage_Payment_Model_Method_Abstract
         $submitdatas["email"] = $buyer_email;
         $submitdatas["returnUrl"] = $return_url;
         $submitdatas["notifyUrl"] = $notifyUrl;
+        // 交易代码，目前只接入收银台支付，交易码固定TA002；API支付后期再接入
         $submitdatas["tranCode"] = "TA002";
-        $submitdatas["goods"] = "[{\"name\":\"producet\",\"price\":\"1.01\",\"nums\":10}]";
+        $submitdatas["goods"] = "[{\"name\":\"producet name\",\"price\":\"1.01\",\"nums\":10}]";
         $submitdatas["remark"] = $remark;
         $submitdatas["shipping_country"] = $shipping_country;
         $submitdatas["first_name"] = $first_name;
@@ -139,7 +124,6 @@ class Magento91_Apgpay_Model_Payment extends Mage_Payment_Model_Method_Abstract
         $submitdatas["country"] = $country;
         $submitdatas["state"] = $state;
         $submitdatas["zipcode"] = $zipcode;
-        $submitdatas["hash"] = strtoupper($hash);
         $submitdatas["sign"] = strtoupper($hash2);
         return $submitdatas;
     }
