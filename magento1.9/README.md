@@ -66,14 +66,27 @@
 
 # 推荐的测试方法
 
+使用docker来测试，可以有效屏蔽环境配置问题，减少重复安装和配置的工作量。
+
 - mysql docker image 5.7
 
-magento版本比较老，推荐使用mysql5.7; arm架构的可以参考[here](https://betterprogramming.pub/mysql-5-7-does-not-have-an-official-docker-image-on-arm-m1-mac-e55cbe093d4c)
+magento版本比较老，推荐使用[mysql5.7](https://hub.docker.com/_/mysql/tags?page=1&name=5.7); arm架构的可以参考[here](https://betterprogramming.pub/mysql-5-7-does-not-have-an-official-docker-image-on-arm-m1-mac-e55cbe093d4c)
 
 启动完成后创建数据库备用
+```shell
+docker run --rm  -e MYSQL_ROOT_PASSWORD=password  -p 3306:3306   mysql:5.7.5
+```
 
 - magento docker  image 1.9.3
 
-https://hub.docker.com/r/alexcheng/magento
+[https://hub.docker.com/r/alexcheng/magento](https://hub.docker.com/r/alexcheng/magento)
 
 启动后可以直接进入安装流程，mysql连接上一步创建好的数据库。
+
+# 常见问题
+
+安装过程常见问题如下
+
+- 插件的文件和文件夹权限问题，请确认文件和文件夹与magento系统其他文件的选项相同
+- 插件的文件和文件夹用户与用户组问题，请确认文件夹与文件与magento系统其他文件属于同一个用户和用户组
+- 缓存问题；完成插件文件上传和权限/用户确认之后，在后台system->cache management中刷新缓存
