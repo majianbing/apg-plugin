@@ -11,16 +11,10 @@ class Magento91_Apgpay_PaymentController extends Mage_Core_Controller_Front_Acti
 	 */
 	protected $_order;
 	protected $_tradeNo;
-		//ƽ̨���׺�
 	protected $_orderNo;
-		//֪ͨʱ��
 	protected $_notifyTime;
-	
-		//֧��״̬
 	protected $_tradeStatus;
-		//ǩ������
 	protected $_signType;
-		//״̬
 	protected $_success;
 
 	/**
@@ -67,8 +61,6 @@ class Magento91_Apgpay_PaymentController extends Mage_Core_Controller_Front_Acti
 		->createBlock('apgpay/redirect')
 		->setOrder($order)
 		->toHtml());
-
-		//$session->unsQuoteId();
 	}
 
 	
@@ -80,7 +72,7 @@ class Magento91_Apgpay_PaymentController extends Mage_Core_Controller_Front_Acti
 	
 	private function _validated()
 	{
-		$model = Mage::getModel('dgpay/payment');
+		$model = Mage::getModel('apgpay/payment');
 		
 		if ($this->getRequest()->isPost()) {
 			$rData = $this->getRequest()->getPost();
@@ -94,36 +86,22 @@ class Magento91_Apgpay_PaymentController extends Mage_Core_Controller_Front_Acti
 			$model->generateErrorResponse();
 		}
 		
-		//������
+
 		$tradeNo = $rData["tradeNo"];
-		//ƽ̨���׺�
 		$orderNo = $rData["orderNo"];
-		//֪ͨʱ��
 		$notifyTime = $rData["notifyTime"];
-		//֧��״̬
 		$tradeStatus = $rData["tradeStatus"];
-		//ǩ������
 		$signType = $rData["signType"];
-		//״̬
 		$success = $rData["success"];
-		//ǩ��
 		$sign = $rData["sign"];
-		//md5
 	    $MD5key = $model->getConfigData('md5_msg');
-		
 		$this->_tradeNo = $tradeNo;
-			//ƽ̨���׺�
 		$this->_orderNo = $orderNo;
-			//֪ͨʱ��
 		$this->_notifyTime = $notifyTime;
-			//֧��״̬
 		$this->_tradeStatus = $tradeStatus;
-			//ǩ������
 		$this->_signType = $signType;
-			//״̬
 		$this->_success = $success;
 
-		
 		$mydata["tradeNo"] = $tradeNo;
 		$mydata["orderNo"] = $orderNo;
 		$mydata["notifyTime"] = $notifyTime;
@@ -139,11 +117,8 @@ class Magento91_Apgpay_PaymentController extends Mage_Core_Controller_Front_Acti
 		
 		$sourcestr = substr($sourcestr,0,strlen($sourcestr)-1);
 		$myhis = $sourcestr;
-
 		$sourcestr .= $MD5key;
-
 		$myjm = md5($sourcestr);
-
 		$this->writeLog('./apgpaylog.txt',date('Y-m-d H:i:s').'---'.'Customer back from APG:'.$myhis);
 		if ($sign == $myjm && $tradeStatus<>'TRADE_CLOSE'){
 			return true;
@@ -159,7 +134,6 @@ public function writeLog($file,$msg){
 	
  /**
 	 *  Success payment page
-	 *  �ص���ַ
 	 *  @param    none
 	 *  @return	  void
 	 */
@@ -180,7 +154,7 @@ public function writeLog($file,$msg){
 		}
 		
 		
-		//������
+
         $merOrderNo= $rData["merOrderNo"];
 		
 		$order = Mage::getModel('sales/order')->loadByIncrementId($merOrderNo);
@@ -197,18 +171,15 @@ public function writeLog($file,$msg){
 		$ref_no = $rData["ref_no"];
         $referenceNo = $rData["referenceNo"];
 		$merchant_id = $rData["merchantNo"];
-		
-		//״̬
+
 		$payCurrency = $rData["payCurrency"];
-		//ǩ��
-		
-		//md5
+
 	    $MD5key = $model->getConfigData('md5_msg');
 
 		$befor_sign =  $merOrderNo.$referenceNo.$payCurrency.$respStatus.$MD5key;
 
         $jmh2 = hash('sha512', $befor_sign);
-		//var_dump($order->getPayment());exit;
+
 		if (strtolower($jmh2) == $hash){
 
 			// = 1
@@ -228,8 +199,8 @@ public function writeLog($file,$msg){
 			if ($respStatus == '0' || $respStatus == '3'){
 				if ($order->state <> Mage_Sales_Model_Order::STATE_CANCELED){
 					$order->addStatusToHistory(
-						Mage_Sales_Model_Order::STATE_CANCELED,//$order->getStatus(),
-						Mage::helper('apgpay')->__('Payment failed by APG!reason:'.$failure_reason)
+						Mage_Sales_Model_Order::STATE_CANCELED,
+						Mage::helper('apgpay')->__('Payment failed by APG ! reason:'.$tranCode)
 					);
 					$order->setState(Mage_Sales_Model_Order::STATE_CANCELED, true);
 					$order->save();
@@ -269,8 +240,7 @@ public function writeLog($file,$msg){
 			$model->generateErrorResponse();
 		}
 		
-		
-		//������
+
         $merOrderNo= $rData["merOrderNo"];
 		
 		$order = Mage::getModel('sales/order')->loadByIncrementId($merOrderNo);
@@ -281,17 +251,13 @@ public function writeLog($file,$msg){
         $hash = $rData["sign"];
 		$amount = $rData["amount"];
 		$failure_reason = $rData["failure_reason"];
-		$trans_date = $rData["trans_date"];
-		$trans_time = $rData["trans_time"];
 		$respStatus = $rData["respStatus"];
 		$ref_no = $rData["ref_no"];
 		$referenceNo = $rData["referenceNo"];
 		$merchant_id = $rData["merchant_id"];
-		
-		//״̬
+
 		$payCurrency = $rData["payCurrency"];
-		//ǩ��
-		
+
 		//md5
 	    $MD5key = $model->getConfigData('md5_msg');
 
