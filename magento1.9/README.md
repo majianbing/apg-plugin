@@ -27,15 +27,15 @@
 
 - Gateway
   
-  网关提交接口,填写 https://test.next-api.com/payment/page/v4/pay
+  网关提交接口,填写 `https://test.next-api.com/payment/page/v4/pay` 生产环境联系技术支持
 
 - ReturnUrl
   
-  回调地址填写 http://www.yourdomain.com/index.php/apgpay/payment/return
+  回调地址填写 `http://www.yourdomain.com/index.php/apgpay/payment/return`
 
 - NotifyUrl
   
-  异步通知地址 http://www.yourdomain.com/index.php/apgpay/payment/notify
+  异步通知地址 `http://www.yourdomain.com/index.php/apgpay/payment/notify`
 
 - New order status	
   
@@ -68,18 +68,21 @@
 
 使用docker来测试，可以有效屏蔽环境配置问题，减少重复安装和配置的工作量。
 
-- mysql docker image 5.7
+- mysql docker image 5.7.5
 
 magento版本比较老，推荐使用[mysql5.7](https://hub.docker.com/_/mysql/tags?page=1&name=5.7); arm架构的可以参考[here](https://betterprogramming.pub/mysql-5-7-does-not-have-an-official-docker-image-on-arm-m1-mac-e55cbe093d4c)
 
-启动完成后创建数据库备用
+启动完成后创建数据库备用，注意修改密码
 ```shell
 docker run --rm  -e MYSQL_ROOT_PASSWORD=password  -p 3306:3306   mysql:5.7.5
 ```
 
+
 - magento docker  image 1.9.3
 
 [https://hub.docker.com/r/alexcheng/magento](https://hub.docker.com/r/alexcheng/magento)
+
+后台启动 `docker run -d -p 80:80 alexcheng/magento` 
 
 启动后可以直接进入安装流程，mysql连接上一步创建好的数据库。
 
