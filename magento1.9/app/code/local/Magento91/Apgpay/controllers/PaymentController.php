@@ -165,6 +165,7 @@ public function writeLog($file,$msg){
 		$hash = $rData["sign"];
 		$amount = $rData["payAmount"];
 		$failure_reason = $rData["failure_reason"];
+        $failure_reason_desc = $rData["respDesc"];
 		$tranCode = $rData["tranCode"];
 		$trans_time = $rData["trans_time"];
 		$respStatus = $rData["respStatus"];
@@ -200,7 +201,7 @@ public function writeLog($file,$msg){
 				if ($order->state <> Mage_Sales_Model_Order::STATE_CANCELED){
 					$order->addStatusToHistory(
 						Mage_Sales_Model_Order::STATE_CANCELED,
-						Mage::helper('apgpay')->__('Payment failed by APG ! reason:'.$tranCode)
+						Mage::helper('apgpay')->__('Payment failed by APG ! reason:'.$failure_reason_desc)
 					);
 					$order->setState(Mage_Sales_Model_Order::STATE_CANCELED, true);
 					$order->save();
@@ -250,7 +251,8 @@ public function writeLog($file,$msg){
 
         $hash = $rData["sign"];
 		$amount = $rData["amount"];
-		$failure_reason = $rData["failure_reason"];
+		$failure_reason = $rData["respCode"];
+		$failure_reason_desc = $rData["respDesc"];
 		$respStatus = $rData["respStatus"];
 		$ref_no = $rData["ref_no"];
 		$referenceNo = $rData["referenceNo"];
@@ -283,7 +285,7 @@ public function writeLog($file,$msg){
 				if ($order->state <> Mage_Sales_Model_Order::STATE_CANCELED){
 					$order->addStatusToHistory(
 						Mage_Sales_Model_Order::STATE_CANCELED,//$order->getStatus(),
-						Mage::helper('apgpay')->__('Payment failed by APG!reason:'.$failure_reason)
+						Mage::helper('apgpay')->__('Payment failed by APG! Reason:'.$failure_reason_desc)
 					);
 					$order->setState(Mage_Sales_Model_Order::STATE_CANCELED, true);
 					$order->save();
