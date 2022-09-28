@@ -1,5 +1,6 @@
 # 一、安装步骤
-- app、skin两个目录上传到magento发布目录下。
+- 下载插件代码，若您不会使用Github，可以点击Code -> Download Zip下载代码压缩包
+- 将app、skin两个目录上传到magento发布目录下。
 - 注意，如果网站开启编译、需要关闭编译状态，然后再上传插件文件。
 - 编译状态是否开启，请检查 system->tools->Compilation； Compiler status应该是Disabled。
 
