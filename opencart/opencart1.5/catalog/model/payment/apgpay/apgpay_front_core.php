@@ -231,7 +231,7 @@ class Apgpay_Front_Core
     public static function response($data)
     {
         if ($data['hash'] != self::response_hash($data)) {
-            return 'fail';
+            return 'sign fail';
         }
 
         if ($data['status'] == '01') { // 成功

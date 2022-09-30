@@ -45,4 +45,10 @@ class ModelExtensionPaymentApgpay extends Model {
         return $ipn->init($data, APGPAY_ORDER_STATUS_PROCESSING_ID, APGPAY_ORDER_STATUS_FAIL_ID,APGPAY_ORDER_STATUS_ID);
     }
 
+    public function real_time($data){
+        $this->initConfig();
+        $ipn = new ApgpayRealTime($this->registry);
+        return $ipn->init($data, APGPAY_ORDER_STATUS_PROCESSING_ID, APGPAY_ORDER_STATUS_FAIL_ID,APGPAY_ORDER_STATUS_ID);
+    }
+
 }

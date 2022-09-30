@@ -27,8 +27,8 @@ class ControllerExtensionPaymentApgpay extends Controller{
             'merOrderNo'=>$order_info['order_id'],
             'payCurrency'=>$order_info['currency_code'],
             'payAmount'=>$this->currency->format($order_info['total'], $order_info['currency_code'], false, false),
-            'returnUrl'=>HTTPS_SERVER . 'index.php?route=extension/payment/apgpay/ipn&dh_rt=real_time',
-            'notifyUrl'=>HTTPS_SERVER . 'index.php?route=extension/payment/apgpay/ipn&dh_rt=real_time',
+            'returnUrl'=>HTTPS_SERVER . 'index.php?route=extension/payment/apgpay/real_time&',
+            'notifyUrl'=>HTTPS_SERVER . 'index.php?route=extension/payment/apgpay/ipn&',
             'remark'=>'',
             'goods'=>'[{"name":"product1","price":"0.01","num":1}]',
             'first_name'=>$order_info['payment_firstname'],
@@ -60,6 +60,14 @@ class ControllerExtensionPaymentApgpay extends Controller{
     }
 
     public function ipn()
+    {
+        $this->load->model('extension/payment/apgpay');
+        $this->load->model('checkout/order');
+
+        $this->model_extension_payment_apgpay->ipn($this->request->get);
+    }
+
+    public function real_time()
     {
         $this->load->model('extension/payment/apgpay');
         $this->load->model('checkout/order');

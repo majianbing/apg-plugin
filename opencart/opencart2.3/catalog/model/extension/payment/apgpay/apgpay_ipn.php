@@ -23,18 +23,18 @@ class ApgpayReturn extends Model{
     public function init($data, $order_status_success, $order_status_fail, $order_status_process){
         $this->data = $data;
 
-        $this->merchantId = $data['merchant_id'];
-        $this->orderId = $data['order_no'];
-        $this->transactionDate = $data['trans_date'];
-        $this->currency = $data['currency'];
-        $this->amount = $data['amount'];
-        $this->failReason = isset($data['failure_reason']) ? $data['failure_reason'] : '';//失败原因
-        $this->transactionTime = $data['trans_time'];
-        $this->status = $data['status'];//交易返回状态00处理中，01成功，02失败
-        $this->refNo = $data['ref_no'];// 参考号
-        $this->hash = $data['hash'];//交易的签名
+        $this->merchantId = $data['merchantNo'];
+        $this->orderId = $data['merOrderNo'];
+        $this->transactionDate = $data['tradeDateTime'];
+        $this->currency = $data['payCurrency'];
+        $this->amount = $data['payAmount'];
+        $this->failReason = isset($data['respDesc']) ? $data['respDesc'] : '';//失败原因
+//        $this->transactionTime = $data['trans_time'];
+        $this->status = $data['respStatus'];//交易返回状态00处理中，01成功，02失败
+        $this->refNo = $data['referenceNo'];// 参考号
+//        $this->hash = $data['hash'];//交易的签名
         $this->sign = $data['sign'];//交易的签名
-        $this->dhReturn = $data['dh_rt'];//ipn,real_time
+        $this->dhReturn = "ipn";//ipn,real_time
 
         $this->order_status_fail = $order_status_fail;
         $this->order_status_success = $order_status_success;
@@ -71,7 +71,7 @@ class ApgpayReturn extends Model{
     }
 
     protected function ipn_fail(){
-        $comment = 'Order payment Fail!Error Msg:' . $this->failReason . '. TransactionNo:' . $this->orderId;
+        $comment = 'Order payment Fail! IPN Error Msg:' . $this->failReason . '. TransactionNo:' . $this->orderId;
         $order_info = $this->model_checkout_order->getOrder($this->orderId);
         if ($order_info && $order_info['order_status_id'] == 0){
             $this->model_checkout_order->addOrderHistory($this->orderId, $this->order_status_fail, $comment);

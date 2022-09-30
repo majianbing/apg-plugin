@@ -126,7 +126,7 @@ class Apgpay_Front_Core
             if (in_array($key, self::$fields)) {
                 switch ($key) {
                     case 'product_price':
-                    case 'amount':
+                    case 'payAmount':
                         $row = sprintf('%.2f', $row);
                         break;
                     default:
@@ -179,49 +179,20 @@ class Apgpay_Front_Core
 
     public static function request_hash($data)
     {
-        $hash_src = '';
-        $sourcestr_2 = '';
-        $hash_key = array('merchantNo', 'merOrderNo', 'payCurrency', 'payAmount', 'returnUrl');
-        // 按 key 名进行顺序排序
-        sort($hash_key);
-        foreach ($hash_key as $key) {
-            $hash_src .= $data[$key];
-        }
-        // 密钥放最前面
-        $hash_src =   $hash_src . APGPAY_PRIVATE_KEY;
-
         $sourcestr_2 = $data['merchantNo'] . $data['merOrderNo'] . $data['payCurrency'] . $data['payAmount'] . $data['returnUrl'] . APGPAY_PRIVATE_KEY;
-        echo $sourcestr_2;
+//        echo $sourcestr_2;
         $hash2 = hash('sha512', $sourcestr_2);
-        // sha512 算法
-        $hash = hash('sha512', $hash_src);
-
-        $data['hash'] = strtolower($hash);
-
         $data['sign'] = strtolower($hash2);
         return $data;
     }
 
     public static function response_hash($data)
     {
-        $hash_src = '';
-        $hash_key = array(
-            'amount', 'currency', 'invoice_id', 'merchant_id',
-            'trans_time', 'trans_date', 'status', 'ref_no', 'order_no'
-        );
-        if ($data['status'] == '02') {
-            $hash_key[] = 'failure_reason';
-        }
-        // 按 key 名进行顺序排序
-        sort($hash_key);
-        foreach ($hash_key as $key) {
-            $hash_src .= isset($data[$key]) ? $data[$key] : '';
-        }
-        // 密钥放最前面
-        $hash_src = APGPAY_PRIVATE_KEY . $hash_src;
-        // sha256 算法
-        $hash = hash('sha256', $hash_src);
-        return strtoupper($hash);
+
+        $befor_sign = $data['merOrderNo'] .$data['referenceNo'].$data['payCurrency'].$data['respStatus'].APGPAY_PRIVATE_KEY;
+        $jmh = hash('sha512', $befor_sign);
+
+        return strtolower($jmh);
     }
 
     public static function getFormUrl()
@@ -246,13 +217,14 @@ class Apgpay_Front_Core
 
     public static function response($data)
     {
-        if ($data['hash'] != self::response_hash($data)) {
+        if ($data['sign'] != self::response_hash($data)) {
+            echo "sing failed";
             return 'fail';
         }
 
-        if ($data['status'] == '01') { // 成功
+        if ($data['respStatus'] == '1') { // 成功
             return 'success';
-        } else if ($data['status'] == '02') { // 失败
+        } else if ($data['respStatus'] == '0') { // 失败
             return 'fail';
         } else {
             return 'process';
