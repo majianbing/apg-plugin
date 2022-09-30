@@ -1,5 +1,5 @@
 <?php
-class ApgpayReturn extends Model{
+class ApgpayRealTime extends Model{
 
     public $merchantId;
     public $orderId;
@@ -34,7 +34,7 @@ class ApgpayReturn extends Model{
         $this->refNo = $data['referenceNo'];// 参考号
 //        $this->hash = $data['hash'];//交易的签名
         $this->sign = $data['sign'];//交易的签名
-        $this->dhReturn = "ipn";//ipn,real_time
+        $this->dhReturn = "real_time";//ipn,real_time
 
         $this->order_status_fail = $order_status_fail;
         $this->order_status_success = $order_status_success;
@@ -70,7 +70,7 @@ class ApgpayReturn extends Model{
     }
 
     protected function ipn_fail(){
-        $comment = 'Order payment Fail! IPN Error Msg:' . $this->failReason . '. TransactionNo:' . $this->orderId;
+        $comment = 'Order payment Fail! real time Error Msg:' . $this->failReason . '. TransactionNo:' . $this->orderId;
         $order_info = $this->model_checkout_order->getOrder($this->orderId);
         if ($order_info && $order_info['order_status_id'] == 0){
             $this->model_checkout_order->addOrderHistory($this->orderId, $this->order_status_fail, $comment);
@@ -88,22 +88,21 @@ class ApgpayReturn extends Model{
 
     protected function real_time_success(){
         $this->ipn_success();
-
+        echo "success";
         return  '<script type="text/javascript">parent.location.href="' .
-        $this->url->link('checkout/success') . '"</script>';
+            $this->url->link('checkout/success') . '"</script>';
     }
 
     protected function real_time_fail(){
         $this->ipn_fail();
-
+        echo  "failed";
         return '<script type="text/javascript">parent.location.href="' .
-        $this->url->link('checkout/failure') . '"</script>';
+            $this->url->link('checkout/failure') . '"</script>';
     }
 
     protected function real_time_process(){
         return '<script type="text/javascript">parent.location.href="' .
-        $this->url->link('checkout/success') . '"</script>';
+            $this->url->link('checkout/success') . '"</script>';
     }
 
 }
- 

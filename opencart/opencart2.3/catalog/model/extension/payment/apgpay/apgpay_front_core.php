@@ -218,7 +218,7 @@ class Apgpay_Front_Core
     public static function response($data)
     {
         if ($data['sign'] != self::response_hash($data)) {
-            echo "sing failed";
+            echo "sign failed ";
             return 'fail';
         }
 
