@@ -8,8 +8,9 @@
  */
 class Apgpay_Front_Core
 {
-
-    const APGPAY_REDIRECT_URL = 'https://www.apgpay.com/merchant/web/cashier';
+    // request host
+    const APGPAY_REDIRECT_URL_PROD = 'https://test.next-api.com/payment/page/v4/pay';
+    const APGPAY_REDIRECT_URL_TEST = 'https://test.next-api.com/payment/page/v4/pay';
     const APGPAY_IFRAME_URL = 'https://www.apgpay.com/merchant/web/cashier/iframe/before?';
 
     static $fields = array(
@@ -19,10 +20,15 @@ class Apgpay_Front_Core
         'merchant_id',
         'invoice_id',
         'order_no',
+        'merOrderNo',
         'currency',
+        'payCurrency',
         'amount',
+        'payAmount',
         'return_url',
+        'returnUrl',
         'remark',
+        'goods',
         'first_name',
         'last_name',
         'address_line',
@@ -33,6 +39,7 @@ class Apgpay_Front_Core
         'zipcode',
         'shipping_country',
         'hash',
+        'sign',
         'body_style',
         'title_style',
         'language',
@@ -97,7 +104,9 @@ class Apgpay_Front_Core
 
     public static function account($params)
     {
-        $params['merchant_id'] = APGPAY_MERCHANT_ID;
+        $params['merchantNo'] = APGPAY_MERCHANT_ID;
+        // 收银台的交易代码
+        $params['tranCode'] = "TA002";
         return $params;
     }
 
@@ -154,9 +163,9 @@ class Apgpay_Front_Core
 
     public static function redirect($data)
     {
-        $url = self::APGPAY_REDIRECT_URL;
+        $url = self::APGPAY_REDIRECT_URL_PROD;
         if (APGPAY_MODE == 'Test') {
-            $url .= '?env=apgpaysandbox';
+            $url = self::APGPAY_REDIRECT_URL_TEST;
         }
         return self::form($data, $url, 'post');
     }
@@ -171,18 +180,25 @@ class Apgpay_Front_Core
     public static function request_hash($data)
     {
         $hash_src = '';
-        $hash_key = array('amount', 'currency', 'invoice_id', 'merchant_id');
+        $sourcestr_2 = '';
+        $hash_key = array('merchantNo', 'merOrderNo', 'payCurrency', 'payAmount', 'returnUrl');
         // 按 key 名进行顺序排序
         sort($hash_key);
         foreach ($hash_key as $key) {
             $hash_src .= $data[$key];
         }
         // 密钥放最前面
-        $hash_src = APGPAY_PRIVATE_KEY . $hash_src;
-        // sha256 算法
-        $hash = hash('sha256', $hash_src);
+        $hash_src =   $hash_src . APGPAY_PRIVATE_KEY;
 
-        $data['hash'] = strtoupper($hash);
+        $sourcestr_2 = $data['merchantNo'] . $data['merOrderNo'] . $data['payCurrency'] . $data['payAmount'] . $data['returnUrl'] . APGPAY_PRIVATE_KEY;
+        echo $sourcestr_2;
+        $hash2 = hash('sha512', $sourcestr_2);
+        // sha512 算法
+        $hash = hash('sha512', $hash_src);
+
+        $data['hash'] = strtolower($hash);
+
+        $data['sign'] = strtolower($hash2);
         return $data;
     }
 

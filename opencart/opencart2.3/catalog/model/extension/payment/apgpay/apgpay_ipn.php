@@ -10,6 +10,7 @@ class ApgpayReturn extends Model{
     public $status;
     public $refNo;
     public $hash;
+    public $sign;
     public $dhReturn;
     public $failReason;
 
@@ -32,6 +33,7 @@ class ApgpayReturn extends Model{
         $this->status = $data['status'];//交易返回状态00处理中，01成功，02失败
         $this->refNo = $data['ref_no'];// 参考号
         $this->hash = $data['hash'];//交易的签名
+        $this->sign = $data['sign'];//交易的签名
         $this->dhReturn = $data['dh_rt'];//ipn,real_time
 
         $this->order_status_fail = $order_status_fail;

@@ -6,7 +6,7 @@ $_['heading_title']					= 'Apgpay';
 $_['text_payment']					= 'Payment';
 $_['text_success']					= 'Success: You have modified Apgpay Setting details!';
 $_['text_edit']                     = 'Edit Apgpay Setting';
-$_['text_apgpay']		            = '<a target="_BLANK" href="https://gloprocessor.com"><img src="view/image/payment/apgpay.png" alt="Apgpay Website" title="Apgpay Website" style="border: 1px solid #EEEEEE;" /></a>';
+$_['text_apgpay']		            = '<a target="_BLANK" href="https://gloprocessor.com"><img src="view/image/payment/logo.png" alt="Apgpay Website" title="Apgpay Website" style="border: 1px solid #EEEEEE;" /></a>';
 $_['text_redirect']					= 'Redirect';
 $_['text_iframe']					= 'Iframe';
 $_['text_horizontal']               = 'Horizontal';
