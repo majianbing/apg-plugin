@@ -279,6 +279,8 @@ public function writeLog($file,$msg){
 				}
 					$this->saveInvoice($order);
 					echo "success";
+                    $order->sendNewOrderEmail();//交易成功发email
+                    $order->setEmailSent(true);
 					exit;
 			}
 			if ($respStatus == '0'){
