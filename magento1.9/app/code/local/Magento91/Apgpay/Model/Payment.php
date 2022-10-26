@@ -111,7 +111,7 @@ class Magento91_Apgpay_Model_Payment extends Mage_Payment_Model_Method_Abstract
         $submitdatas["notifyUrl"] = $notifyUrl;
         // 交易代码，目前只接入收银台支付，交易码固定TA002；API支付后期再接入
         $submitdatas["tranCode"] = "TA002";
-        $submitdatas["goods"] = "[{\"name\":\"producet name\",\"price\":\"1.01\",\"nums\":10}]";
+        $submitdatas["goods"] = "[{\"name\":\"".$product_name."\",\"price\":\"".$product_price."\",\"nums\":10}]";
         $submitdatas["remark"] = $remark;
         $submitdatas["shipping_country"] = $shipping_country;
         $submitdatas["first_name"] = $first_name;
@@ -121,6 +121,14 @@ class Magento91_Apgpay_Model_Payment extends Mage_Payment_Model_Method_Abstract
         $submitdatas["product_quantity"] = $product_quantity;
         $submitdatas["address_line"] = $address_line;
         $submitdatas["city"] = $city;
+        // 妥投结算必填字段 begin
+        $submitdatas["street"] = $address_line;
+        $submitdatas["cityOrTown"] = $city;
+        $submitdatas["cityOrTown"] = $city;
+        $submitdatas["countryOrRegion"] = $country;
+        $submitdatas["stateOrProvince"] = $state;
+        $submitdatas["postCodeOrZip"] = $zipcode;
+        // 妥投结算必填字段 end
         $submitdatas["country"] = $country;
         $submitdatas["state"] = $state;
         $submitdatas["zipcode"] = $zipcode;
