@@ -194,6 +194,8 @@ public function writeLog($file,$msg){
 					$order->save();
 				}
 					$this->saveInvoice($order);
+                    $order->sendNewOrderEmail();//回调时 交易成功发email
+                    $order->setEmailSent(true);
 					$this->_redirect('checkout/onepage/success');
 					
 			}
@@ -279,6 +281,8 @@ public function writeLog($file,$msg){
 				}
 					$this->saveInvoice($order);
 					echo "success";
+                    $order->sendNewOrderEmail();//交易成功发email
+                    $order->setEmailSent(true);
 					exit;
 			}
 			if ($respStatus == '0'){
