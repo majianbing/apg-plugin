@@ -1,0 +1,21 @@
+# Quick start
+
+You can just upload all directories and files to you opencart store root path, and then go to admin dashboard to setting follow this guide.
+
+Go to opencart admin dashboard, click Extensions -> Extensions -> Choose Payments -> Find "APG CreditCard Payment" -> Click Install
+
+After installed, you can click edit, manage configurations.
+
+- Merchant Id, provided by APG, please contact your customer manager.
+- Secure Code, provided by APG, please contact your customer manager.
+- **APG Gateway URL**, If you need to do some test before develop to online environment, you can choose the test gateway URL, which is `https://test.next-api.com/payment/page/v4/pay`
+- Pay Mode, choose one that your prefer
+- **Default Order Status**, Choose Pending recommended.
+- **Success Order Status**, Processed recommended.
+- **Failed Order Status**, Choose Failed recommended.
+- **Pending Order Status**, Choose Pending recommended.
+- Status, Enabled.
+- Sort Order, depends upon your requirements.
+
+
+
