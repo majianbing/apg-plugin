@@ -66,7 +66,7 @@ class Magento91_Apgpay_Model_Payment extends Mage_Payment_Model_Method_Abstract
         $amount = sprintf('%.2f', $order->getGrandTotal());//交易金额
 
         $storeCurrency = Mage::getSingleton('directory/currency')->load($order->order_currency_code);
-        $amount = sprintf('%.2f', $storeCurrency->convert($order->getGrandTotal(), 'USD'));
+        // user the exchange rate from system.
         $buyer_email = $order->getData('customer_email'); //账单地址用户邮箱
 
         $return_url = $errorNotifyUrl = Mage::getUrl('apgpay/payment/return', array('_secure' => true));
@@ -123,7 +123,6 @@ class Magento91_Apgpay_Model_Payment extends Mage_Payment_Model_Method_Abstract
         $submitdatas["city"] = $city;
         // 妥投结算必填字段 begin
         $submitdatas["street"] = $address_line;
-        $submitdatas["cityOrTown"] = $city;
         $submitdatas["cityOrTown"] = $city;
         $submitdatas["countryOrRegion"] = $country;
         $submitdatas["stateOrProvince"] = $state;
