@@ -11,3 +11,5 @@ upload zip file in your wordpress dashboard plugin menu
 
 then setting in Woocommerce->Settings->Payments, enable it and config your merchant account, secure code, etc.
 
+![img](tutorial-img.png)
+

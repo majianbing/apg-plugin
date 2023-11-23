@@ -36,7 +36,7 @@ class WC_Gateway_Apgcreditcard extends WC_Payment_Gateway {
         //$this->icon               = apply_filters('woocommerce_apgcreditcard_icon', plugins_url( 'images/icon.php', __FILE__ ));  
         $this->has_fields         = true;
         $this->method_title       = __( 'Apgpayment CreditCard', 'woocommerce' );
-        $this->method_description = __( '6.4 test gateway', 'woocommerce' );
+        $this->method_description = __( 'APG payment gateway, include credit card, digital wallet, bank transfer, etc.', 'woocommerce' );
 
         // Load the settings.
         $this->init_form_fields();
