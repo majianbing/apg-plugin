@@ -143,7 +143,7 @@ class WC_Gateway_Apgcreditcard extends WC_Payment_Gateway {
                 'desc_tip'    => true,
                 'options'     => array(
                     'https://payment.gloprocessor.com/payment/page/v4/pay' => __( 'Production', 'woocommerce' ),
-                    'https://test.next-api.com/payment/page/v4/pay'   => __( 'Sandbox', 'woocommerce' ),
+                    'https://test-payment.gloprocessor.com/payment/page/v4/pay'   => __( 'Sandbox', 'woocommerce' ),
                 ),
             ),
             

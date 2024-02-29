@@ -8,7 +8,7 @@ $_['text_success']       	= 'Success: You have modified credit card account deta
 $_['text_edit']          	= 'Edit APG CreditCard Payment';
 $_['text_apg_creditcard'] 	= '<img src="view/image/payment/apg_creditcard.png" alt="creditcard" height="25"  title="creditcard" style="border: 1px solid #EEEEEE;" />';
 $_['text_pay']           	= 'https://payment.gloprocessor.com/payment/page/v4/pay';
-$_['text_test']          	= 'https://test.next-api.com/payment/page/v4/pay';
+$_['text_test']          	= 'https://test-payment.gloprocessor.com/payment/page/v4/pay';
 $_['text_pay_iframe']    	= 'Iframe';
 $_['text_pay_redirect']  	= 'Redirect';
 $_['text_logs_true'] 		= 'True';

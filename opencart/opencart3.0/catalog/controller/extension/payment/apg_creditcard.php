@@ -283,7 +283,7 @@ class ControllerExtensionPaymentAPGCreditCard extends Controller {
 			$local_signValue = self::response_hash($data, $securecode);
 
 			$message = self::BrowserReturn ;
-			if($this->config->get('payment_apg_creditcard_transaction') == 'https://test.next-api.com/payment/page/v4/pay'){
+			if($this->config->get('payment_apg_creditcard_transaction') == 'https://test-payment.gloprocessor.com/payment/page/v4/pay'){
 				$message .= 'TEST ORDER - '.$data['merOrderNo'];
 				$data['payment_details'] = ' IT IS TEST ORDER '.$data['merOrderNo'];
 			}
@@ -398,7 +398,7 @@ class ControllerExtensionPaymentAPGCreditCard extends Controller {
 
 				$this->load->model('checkout/order');
 				$message = self::PUSH;
-				if ($this->config->get('payment_apg_creditcard_transaction') == 'https://test.next-api.com/payment/page/v4/pay') {
+				if ($this->config->get('payment_apg_creditcard_transaction') == 'https://test-payment.gloprocessor.com/payment/page/v4/pay') {
 					$message .= 'TEST ORDER - ';
 				}
 				if ($payment_status == 1) {           //交易状态
