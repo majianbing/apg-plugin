@@ -393,7 +393,6 @@ class WC_Gateway_Apgcreditcard extends WC_Payment_Gateway {
         $data_to_send .= "</div>";
         $data_to_send .= "<form  method='post' name='creditcard_checkout' action='".$this->settings['submiturl']."'  >";
         $data_to_send .= "<input type='hidden' name='merchantNo' value='" . $account . "' />";
-        $data_to_send .= "<input type='hidden' name='terminal' value='" . $terminal . "' />";
         $data_to_send .= "<input type='hidden' name='merOrderNo' value='" . $order_number . "' />";
         $data_to_send .= "<input type='hidden' name='payCurrency' value='" . $order_currency . "' />";
         $data_to_send .= "<input type='hidden' name='payAmount' value='" . $order_amount . "' />";
