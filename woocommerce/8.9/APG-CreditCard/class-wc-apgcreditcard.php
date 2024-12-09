@@ -425,102 +425,74 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
      */
     function notice_payment( $order ) {
 
-        //获取推送输入流XML
-        $xml_str = file_get_contents("php://input");
+            //返回账户
+            $account          = $this->settings['account'];
+            //返回终端号
+            $terminal         = $this->settings['terminal'];
+            $securecode         = $this->settings['securecode'];
+            //返回APGpayment 的支付唯一号
+            $payment_id       = sanitize_text_field($_REQUEST['referenceNo']);
+            //返回网站订单号
+            $order_number     = sanitize_text_field($_REQUEST['merOrderNo']);
+            //返回交易币种
+            $order_currency   = sanitize_text_field($_REQUEST['payCurrency']);
+            //返回支付金额
+            $order_amount     = sanitize_text_field($_REQUEST['payAmount']);
+            //返回支付状态
+            $payment_status   = sanitize_text_field($_REQUEST['respStatus']);
+            //返回详情
+            $payment_details  = sanitize_text_field($_REQUEST['respDesc']);
 
-        //判断返回的输入流是否为xml
-        if($this->xml_parser($xml_str)){
-            $xml = simplexml_load_string($xml_str);
-
-            //把推送参数赋值到$return_info
-            $return_info['response_type']		= (string)$xml->response_type;
-            $return_info['account']			    = (string)$xml->account;
-            $return_info['terminal']			= (string)$xml->terminal;
-            $return_info['payment_id']			= (string)$xml->payment_id;
-            $return_info['order_number']		= (string)$xml->order_number;
-            $return_info['order_currency']		= (string)$xml->order_currency;
-            $return_info['order_amount']		= (string)$xml->order_amount;
-            $return_info['payment_status']		= (string)$xml->payment_status;
-            $return_info['payment_details']	    = (string)$xml->payment_details;
-            $return_info['signValue']			= (string)$xml->signValue;
-            $return_info['order_notes']		    = (string)$xml->order_notes;
-            $return_info['card_number']		    = (string)$xml->card_number;
-            $return_info['card_type']			= (string)$xml->card_type;
-            $return_info['card_country']		= (string)$xml->card_country;
-            $return_info['payment_authType']	= (string)$xml->payment_authType;
-            $return_info['payment_risk']		= (string)$xml->payment_risk;
-            $return_info['methods']			    = (string)$xml->methods;
-            $return_info['payment_country']	    = (string)$xml->payment_country;
-            $return_info['payment_solutions']	= (string)$xml->payment_solutions;
-
-            //用于支付结果页面显示响应代码
-            $getErrorCode		= explode(':', $return_info['payment_details']);
-            $errorCode			= $getErrorCode[0];
+            //返回交易安全签名
+            $back_signValue   = sanitize_text_field($_REQUEST['sign']);
+            //返回备注
+            $order_notes      = sanitize_text_field($_REQUEST['remark']);
+            //返回支付信用卡卡号
+            $card_number      = sanitize_text_field($_REQUEST['cardBin']) . '****' . sanitize_text_field($_REQUEST['cardLast4']);
 
 
-            //匹配终端号   判断是否3D交易
-            if($return_info['terminal'] == $this->settings['terminal']){
-                $secureCode = $this->settings['securecode'];
-            }elseif($return_info['terminal'] == $this->settings['secure_terminal']){
-                //3D
-                $secureCode = $this->settings['secure_securecode'];
-            }else{
-                $secureCode = '';
+            $befor_sign = $order_number . $payment_id. $order_currency.$payment_status.$securecode;
+            $jmh = hash('sha512', $befor_sign);
+            $local_signValue = strtolower($jmh);
+            if($this->settings['log'] === 'true') {
+                $this->postLog($_REQUEST, self::BrowserReturn);
             }
 
-
-            $local_signValue  = hash("sha256",$return_info['account'].$return_info['terminal'].$return_info['order_number'].$return_info['order_currency'].$return_info['order_amount'].$return_info['order_notes'].$return_info['card_number'].
-                $return_info['payment_id'].$return_info['payment_authType'].$return_info['payment_status'].$return_info['payment_details'].$return_info['payment_risk'].$secureCode);
-
-
-            $order = wc_get_order( $return_info['order_number'] );
+            $order = wc_get_order( $order_number );
             $order_id = $order->get_id();
-            if ( isset( $return_info['payment_id'] ) ) {
-                $order->set_transaction_id( $return_info['payment_id'] );
+            if ( isset( $payment_id ) ) {
+                $order->set_transaction_id( $payment_id );
             }
-            if($this->settings['log'] == 'true'){
-                $this->postLog($return_info, self::PUSH);
-            }
+
 
             strpos($this->settings['submiturl'],'test') != false ? $testorder = 'TEST ORDER - ' : $testorder = '';
-            if($return_info['response_type'] == 1){
 
-                //加密校验
-                if(strtoupper($local_signValue) == strtoupper($return_info['signValue'])){
 
-                    //支付状态
-                    if ($return_info['payment_status'] == 1) {
-                        //成功
-                        $order->update_status( 'processing', __( $testorder.$return_info['payment_details'], 'apgpayment-creditcard-gateway' ) );
-                        wc_reduce_stock_levels( $order_id );
-                        WC()->cart->empty_cart();
-                    } elseif ($return_info['payment_status'] == -1) {
-                        //待处理
-                        if(empty($this->completed_orders()) || !in_array($return_info['order_number'], $this->completed_orders())){
-                            $order->update_status( 'on-hold', __( $testorder.$return_info['payment_details'], 'apgpayment-creditcard-gateway' ) );
-                        }
-                    } elseif ($return_info['payment_status'] == 0) {
-                        //失败
+            //加密校验
+            if(strtoupper($local_signValue) == strtoupper($back_signValue)){
 
-                        //是否点击浏览器后退造成订单号重复 20061
-                        if($errorCode == '20061'){
-
-                        }else{
-                            if(empty($this->completed_orders()) || !in_array($return_info['order_number'], $this->completed_orders())){
-                                $order->update_status( 'failed', __( $testorder.$return_info['payment_details'], 'apgpayment-creditcard-gateway' ) );
-                            }
-                        }
-
+                //支付状态
+                if ($payment_status == 1) {
+                    //成功
+                    $order->update_status( 'processing', __( $testorder.$payment_details, 'apgpayment-creditcard-gateway' ) );
+                    wc_reduce_stock_levels( $order_id );
+                    WC()->cart->empty_cart();
+                } elseif ($payment_status == -1) {
+                    //待处理
+                    if(empty($this->completed_orders()) || !in_array($order_number, $this->completed_orders())){
+                        $order->update_status( 'on-hold', __( $testorder.$payment_details, 'apgpayment-creditcard-gateway' ) );
                     }
-
-                }else{
-                    $order->update_status( 'failed', __( $testorder.$return_info['payment_details'], 'apgpayment-creditcard-gateway' ) );
+                } elseif ($payment_status == 0) {
+                    //失败
+                    if(empty($this->completed_orders()) || !in_array($order_number, $this->completed_orders())){
+                        $order->update_status( 'failed', __( $testorder.$payment_details, 'apgpayment-creditcard-gateway' ) );
+                    }
                 }
 
-
-                echo "receive-ok";
+            }else{
+                $order->update_status( 'failed', __( $testorder.$payment_details, 'apgpayment-creditcard-gateway' ) );
             }
-        }
+            echo "success";
         exit;
 
     }
@@ -529,11 +501,11 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
      * 浏览器返回
      */
     function return_payment( $order ) {
-        var_dump($order);
         //返回账户
         $account          = $this->settings['account'];
         //返回终端号
         $terminal         = $this->settings['terminal'];
+        $securecode         = $this->settings['securecode'];
         //返回APGpayment 的支付唯一号
         $payment_id       = sanitize_text_field($_REQUEST['referenceNo']);
         //返回网站订单号
@@ -544,12 +516,8 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
         $order_amount     = sanitize_text_field($_REQUEST['payAmount']);
         //返回支付状态
         $payment_status   = sanitize_text_field($_REQUEST['respStatus']);
-        //返回��付详情
+        //返回详情
         $payment_details  = sanitize_text_field($_REQUEST['respDesc']);
-
-        //用于支付结果页面显示响应代码
-        $getErrorCode		= explode(':', $payment_details);
-        $errorCode			= $getErrorCode[0];
 
         //返回交易安全签名
         $back_signValue   = sanitize_text_field($_REQUEST['sign']);
@@ -559,13 +527,13 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
         $card_number      = sanitize_text_field($_REQUEST['cardBin']) . '****' . sanitize_text_field($_REQUEST['cardLast4']);
 
 
-        $befor_sign = $order_number . $payment_id. $order_currency.$payment_status.$secureCode;
+        $befor_sign = $order_number . $payment_id. $order_currency.$payment_status.$securecode;
         $jmh = hash('sha512', $befor_sign);
         $local_signValue = strtolower($jmh);
         if($this->settings['log'] === 'true') {
             $this->postLog($_REQUEST, self::BrowserReturn);
         }
-        var_dump($local_signValue);
+ 
         $order = wc_get_order( $order_number );
         if ( isset( $payment_id ) ) {
             $order->set_transaction_id( $payment_id );
@@ -579,10 +547,10 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
             //支付状态
             if ($payment_status == 1) {
                 //成功
-                $order->update_status( 'processing', __( $testorder.$payment_details, 'apgpayment-creditcard-gateway' ) );
+                $order->update_status( 'processing', __( $testorder. $payment_details, 'apgpayment-creditcard-gateway' ) );
                 WC()->cart->empty_cart();
                 $url = $this->get_return_url( $order );
-                wc_add_notice( $testorder.$payment_details, 'success' );
+                wc_add_notice( $testorder. $payment_details, 'success' );
             } elseif ($payment_status == -1) {
                 //待处理               
                 if(empty($this->completed_orders()) || !in_array($_REQUEST['order_number'], $this->completed_orders())){
@@ -592,18 +560,12 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
                 wc_add_notice( $testorder.$payment_details, 'success' );
             } elseif ($payment_status == 0) {
                 //失败
-                //是否点击浏览器后退造成订单号重复 20061
-                if($errorCode == '20061'){
-                    $url = esc_url( wc_get_checkout_url() );
-                }else{
-                    if(empty($this->completed_orders()) || !in_array($_REQUEST['order_number'], $this->completed_orders())){
-                        $order->update_status( 'failed', __( $testorder.$payment_details, 'apgpayment-creditcard-gateway' ) );
-                    }
-                    $url = esc_url( wc_get_checkout_url() );
-                    wc_add_notice( $testorder.$payment_details, 'error' );
-                    wc_add_notice( '', 'error' );
+                if(empty($this->completed_orders()) || !in_array($_REQUEST['order_number'], $this->completed_orders())){
+                    $order->update_status( 'failed', __( $testorder.$payment_details, 'apgpayment-creditcard-gateway' ) );
                 }
-
+                $url = esc_url( wc_get_checkout_url() );
+                wc_add_notice( $testorder.$payment_details, 'error' );
+                wc_add_notice( '', 'error' );
             }
 
         }else{
