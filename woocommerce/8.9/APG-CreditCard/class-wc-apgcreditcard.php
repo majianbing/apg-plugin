@@ -78,33 +78,33 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
 
 
 
-    
-    function payment_fields() {    
+
+    function payment_fields() {
         global $woocommerce;
 
 
         strpos($this->settings['submiturl'],'test') != false ? $testnote = '<br><span style="color:red">Note: In the test state all transactions are not deducted and cannot be shipped or services provided. The interface needs to be closed in time after the test is completed to avoid consumers from placing orders.</span><br>' : $testnote = '';
 
-       	$html_array = array();
+        $html_array = array();
         if(!empty($this->settings['logo'])){
             foreach ($this->settings['logo'] as $key => $value){
-               $url = 'images/'.$value.'.png';
-               $html_array[] = '<img style="height:40px;" src="' . WC_HTTPS::force_https_url( plugins_url($url , __FILE__ ) ) . '" />';
-            } 
+                $url = 'images/'.$value.'.png';
+                $html_array[] = '<img style="height:40px;" src="' . WC_HTTPS::force_https_url( plugins_url($url , __FILE__ ) ) . '" />';
+            }
         }
         $html = implode('', $html_array);
         $description = str_replace(array("\r\n","\r","\n"), ' ', $this->description);
 
-        ?>  
-          <fieldset id='payment-icon'>
-              <script>                      	     
-                document.getElementById('payment-icon').innerHTML='<?php echo '<div class="status-box">'.$description.$testnote.'</div>'.$html ?>';         	　　
-              </script>            
-          </fieldset>
-         <?php   
-     }
-    
-    
+        ?>
+        <fieldset id='payment-icon'>
+            <script>
+                document.getElementById('payment-icon').innerHTML='<?php echo '<div class="status-box">'.$description.$testnote.'</div>'.$html ?>';
+            </script>
+        </fieldset>
+        <?php
+    }
+
+
     /**
      * Initialise Gateway Settings Form Fields
      */
@@ -163,7 +163,7 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
                     'https://test-payment.gloprocessor.com/payment/page/v5/prepay'   => __( 'Sandbox', 'woocommerce' ),
                 ),
             ),
-            
+
             'mode' => array(
                 'title'       => __( 'Pay page Mode', 'woocommerce' ),
                 'type'        => 'select',
@@ -174,14 +174,14 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
                     'iframe'   => __( 'Iframe', 'woocommerce' ),
                 ),
             ),
-   			'logo' => array(
+            'logo' => array(
                 'title' => __('Payment Logos', 'woocommerce'),
                 'type' => 'multiselect',
                 'description' => __( 'Accept Payment Logos.', 'woocommerce' ),
                 'class' => 'chosen_select',
-                'css' => 'width: 350px;',                
-                
-                'options' => array(                   
+                'css' => 'width: 350px;',
+
+                'options' => array(
                     'VISA' => 'VISA',
                     'Mastercard' => 'Mastercard',
                     'American' => 'American Express',
@@ -196,7 +196,7 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
                     'UnionPay',
                 ),
             ),
-			'log' => array(
+            'log' => array(
                 'title'       => __( 'Write The Logs', 'woocommerce' ),
                 'type'        => 'select',
                 'description' => __( 'Whether to write logs', 'woocommerce' ),
@@ -206,22 +206,22 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
                     'false'   => __( 'False', 'woocommerce' ),
                 ),
             ),
-       
+
         );
     }
 
     /**
-	 * Add content to the WC emails.
-	 *
-	 * @param WC_Order $order Order object.
-	 * @param bool     $sent_to_admin  Sent to admin.
-	 * @param bool     $plain_text Email format: plain text or HTML.
-	 */
-	public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
-		if ( $this->instructions && ! $sent_to_admin && 'apgcreditcard' === $order->get_payment_method() && $order->has_status( 'on-hold' ) ) {
-			echo wp_kses_post( wpautop( wptexturize( $this->instructions ) ) . PHP_EOL );
-		}
-	}
+     * Add content to the WC emails.
+     *
+     * @param WC_Order $order Order object.
+     * @param bool     $sent_to_admin  Sent to admin.
+     * @param bool     $plain_text Email format: plain text or HTML.
+     */
+    public function email_instructions( $order, $sent_to_admin, $plain_text = false ) {
+        if ( $this->instructions && ! $sent_to_admin && 'apgcreditcard' === $order->get_payment_method() && $order->has_status( 'on-hold' ) ) {
+            echo wp_kses_post( wpautop( wptexturize( $this->instructions ) ) . PHP_EOL );
+        }
+    }
 
     /**
      * 跳转到支付url
@@ -241,25 +241,35 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
     /**
      * 生成Form表单
      */
-    function receipt_page( $order ) {
-        echo $this->generate_creditcard_form( $order );
-        die;
+    function receipt_page($order) {
+        // Get payment URL and redirect
+        $payment_url = $this->get_payment_url($order);
+
+        if (is_wp_error($payment_url)) {
+            wc_add_notice($payment_url->get_error_message(), 'error');
+            wp_redirect(wc_get_checkout_url());
+            exit;
+        }
+
+        // Redirect to payment URL
+        wp_redirect($payment_url);
+        exit;
     }
 
-
-
-
     /**
-     * 生成 Credit Card form.
+     * Get payment URL from API
      */
-    public function generate_creditcard_form( $order_id ) {
-        $order = wc_get_order( $order_id );
-
+    private function get_payment_url($order_id) {
+        $order = wc_get_order($order_id);
+        //产品名称
+        $productName       = $this->get_product($order,'name');
+        //产品数量
+        $billing_address   = $order->get_billing_address_1();
         //支付币种
         $order_currency    = $order->get_currency();
         //金额
         $order_amount      = $order->get_total();
-        
+
         //账户号
         $account           = $this->settings['account'];
         //终端号
@@ -275,20 +285,20 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
         //服务器响应地址
         $noticeUrl			= WC()->api_request_url( 'notice_' . $this->id );
         //备注
-        $order_notes       = $_SERVER['HTTP_REFERER'];
+        $order_notes       = '';
         //账单人名
         if(!empty($order->get_billing_first_name())){
-            $billing_firstName = substr($this->APGHtmlSpecialChars($order->get_billing_first_name()),0,50);
+            $billing_firstName = substr($this->ApgHtmlSpecialChars($order->get_billing_first_name()),0,50);
         }elseif(!empty($order->get_billing_last_name())){
-            $billing_firstName  = substr($this->APGHtmlSpecialChars($order->get_billing_last_name()),0,50);
+            $billing_firstName  = substr($this->ApgHtmlSpecialChars($order->get_billing_last_name()),0,50);
         }else{
             $billing_firstName  = 'N/A';
         }
         //账单人姓
         if(!empty($order->get_billing_last_name())){
-            $billing_lastName  = substr($this->APGHtmlSpecialChars($order->get_billing_last_name()),0,50);
+            $billing_lastName  = substr($this->ApgHtmlSpecialChars($order->get_billing_last_name()),0,50);
         }elseif(!empty($order->get_billing_first_name())){
-            $billing_lastName = substr($this->APGHtmlSpecialChars($order->get_billing_first_name()),0,50);
+            $billing_lastName = substr($this->ApgHtmlSpecialChars($order->get_billing_first_name()),0,50);
         }else{
             $billing_lastName  = 'N/A';
         }
@@ -307,15 +317,13 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
         //账单人邮编
         $billing_zip       = $order->get_billing_postcode();
         //产品名称
-        $productName       = $this->APGHtmlSpecialChars($this->get_product($order,'name'));
+        $productName       = $this->get_product($order,'name');
         //产品数量
         $productNum        = $this->get_product($order,'num');
-        //产品sku
-        $productSku        = $this->get_product($order,'sku');        
         //收货人的名
-        $ship_firstName	   = empty(substr($this->APGHtmlSpecialChars($order->get_shipping_first_name()),0,50)) ? $billing_firstName : substr($this->APGHtmlSpecialChars($order->get_shipping_first_name()),0,50);
+        $ship_firstName	   = empty(substr($this->ApgHtmlSpecialChars($order->get_shipping_first_name()),0,50)) ? $billing_firstName : substr($this->ApgHtmlSpecialChars($order->get_shipping_first_name()),0,50);
         //收货人的姓
-        $ship_lastName 	   = empty(substr($this->APGHtmlSpecialChars($order->get_shipping_last_name()),0,50)) ? $billing_lastName : substr($this->APGHtmlSpecialChars($order->get_shipping_last_name()),0,50);
+        $ship_lastName 	   = empty(substr($this->ApgHtmlSpecialChars($order->get_shipping_last_name()),0,50)) ? $billing_lastName : substr($this->ApgHtmlSpecialChars($order->get_shipping_last_name()),0,50);
         //收货人的电话
         $ship_phone 	   = empty(str_replace( array( '(', '-', ' ', ')', '.' ), '', $order->get_billing_phone())) ? $billing_phone : str_replace( array( '(', '-', ' ', ')', '.' ), '', $order->get_billing_phone());
         //收货人的国家
@@ -331,151 +339,86 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
         //收货人email
         $ship_email        = empty($order->get_billing_email()) ? $billing_email : $order->get_billing_email();
 
-
         //支付页面样式
         $pages			    = $this->isMobile() ? 1 : 0;
         //网店程序类型
         $isMobile			= $this->isMobile() ? 'Mobile' : 'PC';
-        $cart_info			= 'Woocommerce|V3.2.0|'.$isMobile;
+        $cart_info			= 'Woocommerce|V1.2.0|'.$isMobile;
         //接口版本
-        $cart_api          = 'V3.4';
-        //校验源字符串
+        $cart_api          = 'TA002';
+
+        $order_amount        = $this->formatAmount($order->get_total(), $order->get_currency());
+        $goods = array(array(
+            'name' => $productName,
+            'description' => $productName,
+            'price' => $order_amount,
+            'num' => $productNum
+        ));
+        // Prepare request data
+        $request_data = array(
+            'integration' => "CHECK_OUT",
+            'merchantNo' => $account,
+            'merOrderNo' => $order_id,
+            'payCurrency' => $order->get_currency(),
+            'payAmount' => $order_amount,
+            'returnUrl' => $backUrl,
+            'notifyUrl' => $noticeUrl,
+            'firstName' => $ship_firstName,
+            'lastName' => $ship_lastName,
+            'goods' => $goods,
+            'street' => $ship_addr,
+            'cityOrTown' => $ship_city,
+            'countryOrRegion' => $this->get_country_code_3($ship_country),
+            'stateOrProvince' => $ship_state,
+            'postCodeOrZip' => $ship_zip,
+            'email' => $ship_email,
+            'telephone' => $ship_phone,
+            'sourceUrl' => rtrim(home_url(), '/'),
+            'cartInfo' => $cart_info,
+            'pages' => $pages,
+            'tranCode' => 'TA002',
+            'ip' => '127.0.0.1',
+            'remark' => $order_notes,
+        );
+
+        // Calculate signature
         $sourcestr_2 = $account . $order_number . $order_currency . $order_amount . $backUrl . $securecode;
-        $signValue = hash('sha512', $sourcestr_2);
-
-        $goods             = "[{\"name\":\"".$productName."\",\"price\":\"".$order_amount."\",\"num\":1}]";
-
-
-
-        //记录发送到apgpayment的post log
-        $apgpayment_log_url = dirname( __FILE__ ).'/apgpayment_log/';
-
-        $filedate = date('Y-m-d');
-
-        $postdate = date('Y-m-d H:i:s');
-
-        $newfile  = fopen( $apgpayment_log_url . $filedate . ".log", "a+" );
-
-        $post_log = $postdate."[POST to APGpayment]\r\n" .
-            "account = "           .$account . "\r\n".
-            "terminal = "          .$terminal . "\r\n".
-            "backUrl = "           .$backUrl . "\r\n".
-            "order_number = "      .$order_number . "\r\n".
-            "order_currency = "    .$order_currency . "\r\n".
-            "order_amount = "      .$order_amount . "\r\n".
-            "billing_firstName = " .$billing_firstName . "\r\n".
-            "billing_lastName = "  .$billing_lastName . "\r\n".
-            "billing_email = "     .$billing_email . "\r\n".
-            "billing_phone = "     .$billing_phone . "\r\n".
-            "billing_country = "   .$billing_country . "\r\n".
-            "billing_state = "     .$billing_state . "\r\n".
-            "billing_city = "      .$billing_city . "\r\n".
-            "billing_address = "   .$billing_address . "\r\n".
-            "billing_zip = "       .$billing_zip . "\r\n".
-            "productName = "       .$productName . "\r\n".            
-            "productNum = "        .$productNum . "\r\n".            
-            "productSku = "        .$productSku . "\r\n".            
-            "ship_firstName = "    .$ship_firstName . "\r\n".
-            "ship_lastName = "     .$ship_lastName . "\r\n".
-            "ship_phone = "        .$ship_phone . "\r\n".
-            "ship_country = "      .$ship_country . "\r\n".
-            "ship_state = "        .$ship_state . "\r\n".
-            "ship_city = "         .$ship_city . "\r\n".
-            "ship_addr = "         .$ship_addr . "\r\n".
-            "ship_zip = "          .$ship_zip . "\r\n".
-            "ship_email = "        .$ship_email . "\r\n".
-            "methods = "           .$methods . "\r\n".
-            "signValue = "         .$signValue . "\r\n".
-            "cart_info = "         .$cart_info . "\r\n".
-            "cart_api = "          .$cart_api . "\r\n".
-            "goods = "          .$goods . "\r\n".
-            "order_notes = "       .$order_notes . "\r\n";
-
-        $post_log = $post_log . "*************************************\r\n";
-
-        $post_log = $post_log.file_get_contents( $apgpayment_log_url . $filedate . ".log");
-
-        $filename = fopen( $apgpayment_log_url . $filedate . ".log", "r+" );
-
-        fwrite($filename,$post_log);
-
-        fclose($filename);
-
-        fclose($newfile);
-
-
-
-        $data_to_send  = "<div id='loading' style='position: relative;'>";
-        $data_to_send .= "<div style='position: absolute;background:#FFF; padding: 20px; border: #000 1px solid; width: 320px;margin:130px auto 0;left: 0;right:0;' id='loading'>";
-        $data_to_send .= "<img src='".plugins_url( 'images/opc-ajax-loader.gif', __FILE__ )."' />Loading...Please do not refresh the page";
-        $data_to_send .= "</div>";
-        $data_to_send .= "</div>";
-        $data_to_send .= "<form  method='post' name='creditcard_checkout' action='".$this->settings['submiturl']."'  >";
-        $data_to_send .= "<input type='hidden' name='account' value='" . $account . "' />";
-        $data_to_send .= "<input type='hidden' name='terminal' value='" . $terminal . "' />";
-        $data_to_send .= "<input type='hidden' name='order_number' value='" . $order_number . "' />";
-        $data_to_send .= "<input type='hidden' name='order_currency' value='" . $order_currency . "' />";
-        $data_to_send .= "<input type='hidden' name='order_amount' value='" . $order_amount . "' />";
-        $data_to_send .= "<input type='hidden' name='backUrl' value='" . $backUrl . "' />";
-		$data_to_send .= "<input type='hidden' name='noticeUrl' value='" . $noticeUrl . "' />";
-        $data_to_send .= "<input type='hidden' name='signValue' value='" . $signValue . "' />";
-        $data_to_send .= "<input type='hidden' name='order_notes' value='" . $order_notes . "' />";
-        $data_to_send .= "<input type='hidden' name='methods' value='" . $methods . "' />";
-        $data_to_send .= "<input type='hidden' name='billing_firstName' value='" . $billing_firstName . "' />";
-        $data_to_send .= "<input type='hidden' name='billing_lastName' value='" . $billing_lastName . "' />";
-        $data_to_send .= "<input type='hidden' name='billing_email' value='" . $billing_email . "' />";
-        $data_to_send .= "<input type='hidden' name='billing_phone' value='" . $billing_phone . "' />";
-        $data_to_send .= "<input type='hidden' name='billing_country' value='" . $billing_country . "' />";
-        $data_to_send .= "<input type='hidden' name='billing_state' value='" . $billing_state . "' />";
-        $data_to_send .= "<input type='hidden' name='billing_city' value='" . $billing_city . "' />";
-        $data_to_send .= "<input type='hidden' name='billing_address' value='" . $billing_address . "' />";
-        $data_to_send .= "<input type='hidden' name='billing_zip' value='" . $billing_zip . "' />";
-        $data_to_send .= "<input type='hidden' name='productName' value='" . $productName . "' />";
-        $data_to_send .= "<input type='hidden' name='productNum' value='" . $productNum . "' />";
-        $data_to_send .= "<input type='hidden' name='productSku' value='" . $productSku . "' />";        
-        $data_to_send .= "<input type='hidden' name='ship_firstName' value='" . $ship_firstName . "' />";
-        $data_to_send .= "<input type='hidden' name='ship_lastName' value='" . $ship_lastName . "' />";
-        $data_to_send .= "<input type='hidden' name='ship_phone' value='" . $ship_phone . "' />";
-        $data_to_send .= "<input type='hidden' name='ship_country' value='" . $ship_country . "' />";
-        $data_to_send .= "<input type='hidden' name='ship_state' value='" . $ship_state . "' />";
-        $data_to_send .= "<input type='hidden' name='ship_city' value='" . $ship_city . "' />";
-        $data_to_send .= "<input type='hidden' name='ship_addr' value='" . $ship_addr . "' />";
-        $data_to_send .= "<input type='hidden' name='ship_zip' value='" . $ship_zip . "' />";
-        $data_to_send .= "<input type='hidden' name='ship_email' value='" . $ship_email . "' />";
-        $data_to_send .= "<input type='hidden' name='cart_info' value='" . $cart_info . "' />";
-        $data_to_send .= "<input type='hidden' name='cart_api' value='" . $cart_api . "' />";
-        $data_to_send .= "<input type='hidden' name='goods' value='" . $goods . "' />";
-        $data_to_send .= "<input type='hidden' name='pages' value='" . $pages . "' />";
-        $data_to_send .= "</form>";
-
-        if($this->settings['mode'] == 'redirect'){
-            $data_to_send .= '<script type="text/javascript">' . "\n";
-            $data_to_send .= 'document.creditcard_checkout.submit();' . "\n";
-            $data_to_send .= '</script>' . "\n";
-
-        }elseif($this->settings['mode'] == 'iframe'){
-            $data_to_send .= '<iframe width="100%" height="800px"  scrolling="auto" style="border:none ; margin: 0 auto; overflow:hidden;" id="ifrm_creditcard_checkout" name="ifrm_creditcard_checkout"></iframe>' . "\n";
-
-            $data_to_send .= '<script type="text/javascript">' . "\n";
-            $data_to_send .= 'document.creditcard_checkout.target="ifrm_creditcard_checkout";' . "\n";
-            $data_to_send .= 'document.creditcard_checkout.submit();' . "\n";
-            $data_to_send .= 'var ifrm_cc  = document.getElementById("ifrm_creditcard_checkout");' . "\n";
-            $data_to_send .= 'var loading  = document.getElementById("loading");' . "\n";
-            $data_to_send .= 'if (ifrm_cc.attachEvent){' . "\n";
-            $data_to_send .= '	ifrm_cc.attachEvent("onload", function(){' . "\n";
-            $data_to_send .= '		loading.style.display = "none";' . "\n";
-            $data_to_send .= '	});' . "\n";
-            $data_to_send .= '} else {' . "\n";
-            $data_to_send .= '	ifrm_cc.onload = function(){' . "\n";
-            $data_to_send .= '		loading.style.display = "none";' . "\n";
-            $data_to_send .= '	};' . "\n";
-            $data_to_send .= '}' . "\n";
-            $data_to_send .= '</script>' . "\n";
+        $request_data['sign'] = hash('sha512', $sourcestr_2);
+        // Log request if enabled
+        if ($this->settings['log'] == 'true') {
+            $this->postLog($request_data, self::SEND);
         }
 
+        // Make API request
+        $response = wp_remote_post($this->settings['submiturl'], array(
+            'method' => 'POST',
+            'timeout' => 45,
+            'redirection' => 5,
+            'httpversion' => '1.0',
+            'blocking' => true,
+            'headers' => array(
+                'Content-Type' => 'application/json',
+                'Accept' => 'application/json'
+            ),
+            'body' => json_encode($request_data),
+            'cookies' => array()
+        ));
+        // Handle response
+        if (is_wp_error($response)) {
+            return new WP_Error('api_error', 'Payment gateway API error: ' . $response->get_error_message());
+        }
 
-        return $data_to_send;
+        $body = json_decode(wp_remote_retrieve_body($response), true);
+        // Log response if enabled
+        if ($this->settings['log'] == 'true') {
+            $this->postLog($body, '[API Response]');
+        }
+        if (!isset($body['paymentUrl'])) {
+            return new WP_Error('api_error', 'Invalid response from payment gateway. '.$body['respCode'] .'  '. $body['respDesc']);
+        }
+        return $body['paymentUrl'];
     }
+
 
     /**
      * 异步通知
@@ -554,18 +497,18 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
                     } elseif ($return_info['payment_status'] == -1) {
                         //待处理
                         if(empty($this->completed_orders()) || !in_array($return_info['order_number'], $this->completed_orders())){
-                    		$order->update_status( 'on-hold', __( $testorder.$return_info['payment_details'], 'apgpayment-creditcard-gateway' ) );
-                		}
+                            $order->update_status( 'on-hold', __( $testorder.$return_info['payment_details'], 'apgpayment-creditcard-gateway' ) );
+                        }
                     } elseif ($return_info['payment_status'] == 0) {
                         //失败
 
                         //是否点击浏览器后退造成订单号重复 20061
                         if($errorCode == '20061'){
-                          
+
                         }else{
-                        	if(empty($this->completed_orders()) || !in_array($return_info['order_number'], $this->completed_orders())){
-                    			$order->update_status( 'failed', __( $testorder.$return_info['payment_details'], 'apgpayment-creditcard-gateway' ) );
-                			}
+                            if(empty($this->completed_orders()) || !in_array($return_info['order_number'], $this->completed_orders())){
+                                $order->update_status( 'failed', __( $testorder.$return_info['payment_details'], 'apgpayment-creditcard-gateway' ) );
+                            }
                         }
 
                     }
@@ -586,69 +529,53 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
      * 浏览器返回
      */
     function return_payment( $order ) {
-
+        var_dump($order);
         //返回账户
         $account          = $this->settings['account'];
         //返回终端号
         $terminal         = $this->settings['terminal'];
         //返回APGpayment 的支付唯一号
-        $payment_id       = sanitize_text_field($_REQUEST['payment_id']);
+        $payment_id       = sanitize_text_field($_REQUEST['referenceNo']);
         //返回网站订单号
-        $order_number     = sanitize_text_field($_REQUEST['order_number']);
+        $order_number     = sanitize_text_field($_REQUEST['merOrderNo']);
         //返回交易币种
-        $order_currency   = sanitize_text_field($_REQUEST['order_currency']);
+        $order_currency   = sanitize_text_field($_REQUEST['payCurrency']);
         //返回支付金额
-        $order_amount     = sanitize_text_field($_REQUEST['order_amount']);
+        $order_amount     = sanitize_text_field($_REQUEST['payAmount']);
         //返回支付状态
-        $payment_status   = sanitize_text_field($_REQUEST['payment_status']);
-        //返回支付详情
-        $payment_details  = sanitize_text_field($_REQUEST['payment_details']);
+        $payment_status   = sanitize_text_field($_REQUEST['respStatus']);
+        //返回��付详情
+        $payment_details  = sanitize_text_field($_REQUEST['respDesc']);
 
         //用于支付结果页面显示响应代码
         $getErrorCode		= explode(':', $payment_details);
         $errorCode			= $getErrorCode[0];
 
         //返回交易安全签名
-        $back_signValue   = sanitize_text_field($_REQUEST['signValue']);
+        $back_signValue   = sanitize_text_field($_REQUEST['sign']);
         //返回备注
-        $order_notes      = sanitize_text_field($_REQUEST['order_notes']);
-        //未通过的风控规则
-        $payment_risk     = sanitize_text_field($_REQUEST['payment_risk']);
+        $order_notes      = sanitize_text_field($_REQUEST['remark']);
         //返回支付信用卡卡号
-        $card_number      = sanitize_text_field($_REQUEST['card_number']);
-        //返回交易类型
-        $payment_authType = sanitize_text_field($_REQUEST['payment_authType']);
-        //解决方案
-        $payment_solutions = sanitize_text_field($_REQUEST['payment_solutions']);
+        $card_number      = sanitize_text_field($_REQUEST['cardBin']) . '****' . sanitize_text_field($_REQUEST['cardLast4']);
 
-        //匹配终端号   判断是否3D交易
-        if($terminal == $this->settings['terminal']){
-            $secureCode = $this->settings['securecode'];
-        }elseif($terminal == $this->settings['secure_terminal']){
-            //3D
-            $secureCode = $this->settings['secure_securecode'];
-        }else{
-            $secureCode = '';
+
+        $befor_sign = $order_number . $payment_id. $order_currency.$payment_status.$secureCode;
+        $jmh = hash('sha512', $befor_sign);
+        $local_signValue = strtolower($jmh);
+        if($this->settings['log'] === 'true') {
+            $this->postLog($_REQUEST, self::BrowserReturn);
         }
-
-
-        //SHA256加密
-        $local_signValue = hash("sha256",$account.$terminal.$order_number.$order_currency.$order_amount.$order_notes.$card_number.
-            $payment_id.$payment_authType.$payment_status.$payment_details.$payment_risk.$secureCode);
-
-
+        var_dump($local_signValue);
         $order = wc_get_order( $order_number );
         if ( isset( $payment_id ) ) {
             $order->set_transaction_id( $payment_id );
         }
-        if($this->settings['log'] === 'true') {
-            $this->postLog($_REQUEST, self::BrowserReturn);
-        }
+
 
         strpos($this->settings['submiturl'],'test') != false ? $testorder = 'TEST ORDER - ' : $testorder = '';
         //加密校验
         if(strtoupper($local_signValue) == strtoupper($back_signValue)){
-                      
+
             //支付状态
             if ($payment_status == 1) {
                 //成功
@@ -659,23 +586,22 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
             } elseif ($payment_status == -1) {
                 //待处理               
                 if(empty($this->completed_orders()) || !in_array($_REQUEST['order_number'], $this->completed_orders())){
-                	$order->update_status( 'on-hold', __( $testorder.$payment_details, 'apgpayment-creditcard-gateway' ) );
-        		}
+                    $order->update_status( 'on-hold', __( $testorder.$payment_details, 'apgpayment-creditcard-gateway' ) );
+                }
                 $url = $this->get_return_url( $order );
                 wc_add_notice( $testorder.$payment_details, 'success' );
             } elseif ($payment_status == 0) {
                 //失败
-
                 //是否点击浏览器后退造成订单号重复 20061
                 if($errorCode == '20061'){
                     $url = esc_url( wc_get_checkout_url() );
-                }else{                   
-					if(empty($this->completed_orders()) || !in_array($_REQUEST['order_number'], $this->completed_orders())){
-                		$order->update_status( 'failed', __( $testorder.$payment_details, 'apgpayment-creditcard-gateway' ) );
-        			}
+                }else{
+                    if(empty($this->completed_orders()) || !in_array($_REQUEST['order_number'], $this->completed_orders())){
+                        $order->update_status( 'failed', __( $testorder.$payment_details, 'apgpayment-creditcard-gateway' ) );
+                    }
                     $url = esc_url( wc_get_checkout_url() );
                     wc_add_notice( $testorder.$payment_details, 'error' );
-                    wc_add_notice( $payment_solutions, 'error' );
+                    wc_add_notice( '', 'error' );
                 }
 
             }
@@ -703,13 +629,13 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
 
 
     }
-    
+
     /**
      * 是否存在相同订单号
      * @return unknown
      */
     function completed_orders(){
-    
+
         global $wpdb;
 
         $query = $wpdb->get_results("
@@ -724,7 +650,7 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
         foreach($query as $result){
             $results[] = $result->order_id;
         }
-    
+
         return $results;
     }
 
@@ -736,7 +662,7 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
      * @return multitype:NULL
      */
     public function get_product($order,$type){
-        $product_array = array();      
+        $product_array = array();
         foreach ($order->get_items() as $item_key => $item ){
             $item_data = $item->get_data();
             $product = $item->get_product();
@@ -746,7 +672,7 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
                 $product->get_sku() != '' ? $product_array[] = substr($product->get_sku(), 0,500) : $product_array[] = 'N/A';
             }elseif($type == 'name'){
                 $product->get_name() != '' ? $product_array[] = substr($product->get_name(), 0,500) : $product_array[] = 'N/A';
-            }         
+            }
         }
         return implode(';', $product_array);
     }
@@ -813,7 +739,7 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
                 if($order_amount >= $amountValidate[$order_currency]){
 //				    echo '<pre>';
 //				    print_r($amountValidate[$order_currency]);exit;
-                    //需要3D
+                    //需3D
                     $is_3d = 1;
                 }
             }else{
@@ -869,7 +795,7 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
             // 找不到为flase,否则为true
             return stristr($_SERVER['HTTP_VIA'], "wap") ? true : false;
         }
-        // 判断手机发送的客户端标志
+        // 判断手机发的客户端标志
         if (isset ($_SERVER['HTTP_USER_AGENT'])){
             $clientkeywords = array (
                 'nokia','sony','ericsson','mot','samsung','htc','sgh','lg','sharp','sie-','philips','panasonic','alcatel',
@@ -930,6 +856,66 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
         }else {
             return true;
         }
+    }
+
+    /**
+     * Convert 2-letter country code to 3-letter country code
+     */
+    private function get_country_code_3($country_code_2) {
+        $countries = array(
+            'AF' => 'AFG', 'AX' => 'ALA', 'AL' => 'ALB', 'DZ' => 'DZA', 'AS' => 'ASM',
+            'AD' => 'AND', 'AO' => 'AGO', 'AI' => 'AIA', 'AQ' => 'ATA', 'AG' => 'ATG',
+            'AR' => 'ARG', 'AM' => 'ARM', 'AW' => 'ABW', 'AU' => 'AUS', 'AT' => 'AUT',
+            'AZ' => 'AZE', 'BS' => 'BHS', 'BH' => 'BHR', 'BD' => 'BGD', 'BB' => 'BRB',
+            'BY' => 'BLR', 'BE' => 'BEL', 'BZ' => 'BLZ', 'BJ' => 'BEN', 'BM' => 'BMU',
+            'BT' => 'BTN', 'BO' => 'BOL', 'BA' => 'BIH', 'BW' => 'BWA', 'BV' => 'BVT',
+            'BR' => 'BRA', 'IO' => 'IOT', 'BN' => 'BRN', 'BG' => 'BGR', 'BF' => 'BFA',
+            'BI' => 'BDI', 'KH' => 'KHM', 'CM' => 'CMR', 'CA' => 'CAN', 'CV' => 'CPV',
+            'KY' => 'CYM', 'CF' => 'CAF', 'TD' => 'TCD', 'CL' => 'CHL', 'CN' => 'CHN',
+            'CX' => 'CXR', 'CC' => 'CCK', 'CO' => 'COL', 'KM' => 'COM', 'CG' => 'COG',
+            'CD' => 'COD', 'CK' => 'COK', 'CR' => 'CRI', 'CI' => 'CIV', 'HR' => 'HRV',
+            'CU' => 'CUB', 'CY' => 'CYP', 'CZ' => 'CZE', 'DK' => 'DNK', 'DJ' => 'DJI',
+            'DM' => 'DMA', 'DO' => 'DOM', 'EC' => 'ECU', 'EG' => 'EGY', 'SV' => 'SLV',
+            'GQ' => 'GNQ', 'ER' => 'ERI', 'EE' => 'EST', 'ET' => 'ETH', 'FK' => 'FLK',
+            'FO' => 'FRO', 'FJ' => 'FJI', 'FI' => 'FIN', 'FR' => 'FRA', 'GF' => 'GUF',
+            'PF' => 'PYF', 'TF' => 'ATF', 'GA' => 'GAB', 'GM' => 'GMB', 'GE' => 'GEO',
+            'DE' => 'DEU', 'GH' => 'GHA', 'GI' => 'GIB', 'GR' => 'GRC', 'GL' => 'GRL',
+            'GD' => 'GRD', 'GP' => 'GLP', 'GU' => 'GUM', 'GT' => 'GTM', 'GG' => 'GGY',
+            'GN' => 'GIN', 'GW' => 'GNB', 'GY' => 'GUY', 'HT' => 'HTI', 'HM' => 'HMD',
+            'VA' => 'VAT', 'HN' => 'HND', 'HK' => 'HKG', 'HU' => 'HUN', 'IS' => 'ISL',
+            'IN' => 'IND', 'ID' => 'IDN', 'IR' => 'IRN', 'IQ' => 'IRQ', 'IE' => 'IRL',
+            'IM' => 'IMN', 'IL' => 'ISR', 'IT' => 'ITA', 'JM' => 'JAM', 'JP' => 'JPN',
+            'JE' => 'JEY', 'JO' => 'JOR', 'KZ' => 'KAZ', 'KE' => 'KEN', 'KI' => 'KIR',
+            'KP' => 'PRK', 'KR' => 'KOR', 'KW' => 'KWT', 'KG' => 'KGZ', 'LA' => 'LAO',
+            'LV' => 'LVA', 'LB' => 'LBN', 'LS' => 'LSO', 'LR' => 'LBR', 'LY' => 'LBY',
+            'LI' => 'LIE', 'LT' => 'LTU', 'LU' => 'LUX', 'MO' => 'MAC', 'MK' => 'MKD',
+            'MG' => 'MDG', 'MW' => 'MWI', 'MY' => 'MYS', 'MV' => 'MDV', 'ML' => 'MLI',
+            'MT' => 'MLT', 'MH' => 'MHL', 'MQ' => 'MTQ', 'MR' => 'MRT', 'MU' => 'MUS',
+            'YT' => 'MYT', 'MX' => 'MEX', 'FM' => 'FSM', 'MD' => 'MDA', 'MC' => 'MCO',
+            'MN' => 'MNG', 'ME' => 'MNE', 'MS' => 'MSR', 'MA' => 'MAR', 'MZ' => 'MOZ',
+            'MM' => 'MMR', 'NA' => 'NAM', 'NR' => 'NRU', 'NP' => 'NPL', 'NL' => 'NLD',
+            'AN' => 'ANT', 'NC' => 'NCL', 'NZ' => 'NZL', 'NI' => 'NIC', 'NE' => 'NER',
+            'NG' => 'NGA', 'NU' => 'NIU', 'NF' => 'NFK', 'MP' => 'MNP', 'NO' => 'NOR',
+            'OM' => 'OMN', 'PK' => 'PAK', 'PW' => 'PLW', 'PS' => 'PSE', 'PA' => 'PAN',
+            'PG' => 'PNG', 'PY' => 'PRY', 'PE' => 'PER', 'PH' => 'PHL', 'PN' => 'PCN',
+            'PL' => 'POL', 'PT' => 'PRT', 'PR' => 'PRI', 'QA' => 'QAT', 'RE' => 'REU',
+            'RO' => 'ROU', 'RU' => 'RUS', 'RW' => 'RWA', 'BL' => 'BLM', 'SH' => 'SHN',
+            'KN' => 'KNA', 'LC' => 'LCA', 'MF' => 'MAF', 'PM' => 'SPM', 'VC' => 'VCT',
+            'WS' => 'WSM', 'SM' => 'SMR', 'ST' => 'STP', 'SA' => 'SAU', 'SN' => 'SEN',
+            'RS' => 'SRB', 'SC' => 'SYC', 'SL' => 'SLE', 'SG' => 'SGP', 'SK' => 'SVK',
+            'SI' => 'SVN', 'SB' => 'SLB', 'SO' => 'SOM', 'ZA' => 'ZAF', 'GS' => 'SGS',
+            'ES' => 'ESP', 'LK' => 'LKA', 'SD' => 'SDN', 'SR' => 'SUR', 'SJ' => 'SJM',
+            'SZ' => 'SWZ', 'SE' => 'SWE', 'CH' => 'CHE', 'SY' => 'SYR', 'TW' => 'TWN',
+            'TJ' => 'TJK', 'TZ' => 'TZA', 'TH' => 'THA', 'TL' => 'TLS', 'TG' => 'TGO',
+            'TK' => 'TKL', 'TO' => 'TON', 'TT' => 'TTO', 'TN' => 'TUN', 'TR' => 'TUR',
+            'TM' => 'TKM', 'TC' => 'TCA', 'TV' => 'TUV', 'UG' => 'UGA', 'UA' => 'UKR',
+            'AE' => 'ARE', 'GB' => 'GBR', 'US' => 'USA', 'UM' => 'UMI', 'UY' => 'URY',
+            'UZ' => 'UZB', 'VU' => 'VUT', 'VE' => 'VEN', 'VN' => 'VNM', 'VG' => 'VGB',
+            'VI' => 'VIR', 'WF' => 'WLF', 'EH' => 'ESH', 'YE' => 'YEM', 'ZM' => 'ZMB',
+            'ZW' => 'ZWE'
+        );
+
+        return isset($countries[$country_code_2]) ? $countries[$country_code_2] : $country_code_2;
     }
 
 }
