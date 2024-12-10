@@ -348,12 +348,38 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
         $cart_api          = 'TA002';
 
         $order_amount        = $this->formatAmount($order->get_total(), $order->get_currency());
-        $goods = array(array(
-            'name' => $productName,
-            'description' => $productName,
-            'price' => $order_amount,
-            'num' => $productNum
-        ));
+        
+        // Build goods array with all products including images
+        $goods = array();
+        foreach ($order->get_items() as $item) {
+            $product = $item->get_product();
+            
+            // Get product image URL
+            $image_url = wp_get_attachment_image_url($product->get_image_id(), 'thumbnail');
+            if (!$image_url) {
+                $image_url = wc_placeholder_img_src('thumbnail');
+            }
+            
+            $goods[] = array(
+                'name' => substr($product->get_name(), 0, 500),
+                'description' => substr($product->get_name(), 0, 500),
+                'price' => $this->formatAmount($item->get_total(), $order->get_currency()),
+                'num' => $item->get_quantity(),
+                'img' => $image_url
+            );
+        }
+
+        // If no items found, add a default item
+        if (empty($goods)) {
+            $goods[] = array(
+                'name' => 'Order #' . $order_id,
+                'description' => 'Order #' . $order_id,
+                'price' => $order_amount,
+                'num' => 1,
+                'img' => wc_placeholder_img_src('thumbnail')
+            );
+        }
+
         // Prepare request data
         $request_data = array(
             'integration' => "CHECK_OUT",
@@ -477,7 +503,7 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
                     $order->update_status( 'processing', __( $testorder.$payment_details, 'apgpayment-creditcard-gateway' ) );
                     wc_reduce_stock_levels( $order_id );
                     WC()->cart->empty_cart();
-                } elseif ($payment_status == -1) {
+                } elseif ($payment_status == 2) {
                     //待处理
                     if(empty($this->completed_orders()) || !in_array($order_number, $this->completed_orders())){
                         $order->update_status( 'on-hold', __( $testorder.$payment_details, 'apgpayment-creditcard-gateway' ) );
@@ -551,7 +577,7 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
                 WC()->cart->empty_cart();
                 $url = $this->get_return_url( $order );
                 wc_add_notice( $testorder. $payment_details, 'success' );
-            } elseif ($payment_status == -1) {
+            } elseif ($payment_status == 2) {
                 //待处理               
                 if(empty($this->completed_orders()) || !in_array($_REQUEST['order_number'], $this->completed_orders())){
                     $order->update_status( 'on-hold', __( $testorder.$payment_details, 'apgpayment-creditcard-gateway' ) );
