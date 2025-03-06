@@ -86,6 +86,12 @@ endif;
 
 add_action( 'after_setup_theme', 'shoes_store_setup' );
 
+add_action('rest_api_init', function () {
+    header("Access-Control-Allow-Origin: http://localhost:5173");
+    header("Access-Control-Allow-Methods: GET, POST, OPTIONS, PUT, DELETE");
+    header("Access-Control-Allow-Credentials: true");
+});
+
 // Notice after Theme Activation
 function shoes_store_activation_notice() {
 	echo '<div class="notice notice-success is-dismissible welcome-notice">';

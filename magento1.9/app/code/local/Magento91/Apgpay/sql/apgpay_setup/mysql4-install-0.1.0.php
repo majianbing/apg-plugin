@@ -1,6 +1,6 @@
 <?php
 /**
- * E: sales@gloprocessor.com
+ * E: sales@glocashier.com
  * W:www.magento.con
  */
 

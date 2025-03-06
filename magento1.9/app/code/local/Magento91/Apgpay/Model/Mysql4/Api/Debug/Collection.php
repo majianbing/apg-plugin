@@ -1,6 +1,6 @@
 <?php
 /**
- * E: sales@gloprocessor.com
+ * E: sales@glocashier.com
  * W:www.magento.con
  */
 class Magento91_Apgpay_Model_Mysql4_Api_Debug_Collection extends Mage_Core_Model_Mysql4_Collection_Abstract

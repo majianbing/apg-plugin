@@ -159,8 +159,8 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
                 'description' => __( 'Note: In the test state all transactions are not deducted and cannot be shipped or services provided. The interface needs to be closed in time after the test is completed to avoid consumers from placing orders.', 'woocommerce' ),
                 'desc_tip'    => true,
                 'options'     => array(
-                    'https://payment.gloprocessor.com/payment/page/v5/prepay' => __( 'Production', 'woocommerce' ),
-                    'https://test-payment.gloprocessor.com/payment/page/v5/prepay'   => __( 'Sandbox', 'woocommerce' ),
+                    'https://payment.glocashier.com/payment/page/v5/prepay' => __( 'Production', 'woocommerce' ),
+                    'https://test-payment.glocashier.com/payment/page/v5/prepay'   => __( 'Sandbox', 'woocommerce' ),
                 ),
             ),
 

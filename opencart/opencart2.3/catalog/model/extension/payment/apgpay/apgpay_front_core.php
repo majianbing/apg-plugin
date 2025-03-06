@@ -9,8 +9,8 @@
 class Apgpay_Front_Core
 {
     // request host
-    const APGPAY_REDIRECT_URL_PROD = 'https://test-payment.gloprocessor.com/payment/page/v4/pay';
-    const APGPAY_REDIRECT_URL_TEST = 'https://test-payment.gloprocessor.com/payment/page/v4/pay';
+    const APGPAY_REDIRECT_URL_PROD = 'https://test-payment.glocashier.com/payment/page/v4/pay';
+    const APGPAY_REDIRECT_URL_TEST = 'https://test-payment.glocashier.com/payment/page/v4/pay';
     const APGPAY_IFRAME_URL = 'https://www.apgpay.com/merchant/web/cashier/iframe/before?';
 
     static $fields = array(

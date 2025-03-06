@@ -28,7 +28,7 @@
 
 - Gateway
   
-  网关提交接口,填写 `https://test-payment.gloprocessor.com/payment/page/v4/pay` 生产环境联系技术支持
+  网关提交接口,填写 `https://test-payment.glocashier.com/payment/page/v4/pay` 生产环境联系技术支持
 
 - ReturnUrl
   

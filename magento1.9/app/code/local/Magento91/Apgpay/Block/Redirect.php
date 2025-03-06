@@ -1,6 +1,6 @@
 <?php
 /**
- * E: sales@gloprocessor.com
+ * E: sales@glocashier.com
  * W:www.magento.con
  */
 class Magento91_Apgpay_Block_Redirect extends Mage_Core_Block_Abstract

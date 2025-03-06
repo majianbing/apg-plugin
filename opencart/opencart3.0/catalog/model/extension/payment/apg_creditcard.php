@@ -23,7 +23,7 @@ class ModelExtensionPaymentAPGCreditCard extends Model {
 	
 		if ($status) {
 			$title = $this->language->get('text_title');
-			if($this->config->get('payment_apg_creditcard_transaction') == 'https://test-payment.gloprocessor.com/payment/page/v4/pay'){
+			if($this->config->get('payment_apg_creditcard_transaction') == 'https://test-payment.glocashier.com/payment/page/v4/pay'){
 				$title = $this->language->get('text_title').'<br><p style="color: red;">Notice: In the test mode all transactions are not deducted and cannot be shipped or services provided.</p>';
 			}
       		$method_data = array( 
