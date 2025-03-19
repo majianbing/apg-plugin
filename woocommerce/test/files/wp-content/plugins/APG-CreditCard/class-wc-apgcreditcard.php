@@ -566,7 +566,7 @@ class WC_Gateway_APGcreditcard extends WC_Payment_Gateway {
         //返回备注
         $order_notes      = sanitize_text_field($_REQUEST['remark']);
         //返回支付信用卡卡号
-        $card_number      = sanitize_text_field($_REQUEST['cardBin']) . '****' . sanitize_text_field($_REQUEST['cardLast4']);
+        $card_number      = "";
 
 
         $befor_sign = $order_number . $payment_id. $order_currency.$payment_status.$securecode;
