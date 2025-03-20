@@ -140,6 +140,7 @@ class WC_Gateway_Apgcreditcard extends WC_Payment_Gateway {
                 'title'       => __( 'Submiturl', 'woocommerce' ),
                 'type'        => 'select',
                 'description' => __( 'Note: In the test state all transactions are not deducted and cannot be shipped or services provided. The interface needs to be closed in time after the test is completed to avoid consumers from placing orders.', 'woocommerce' ),
+                'default'     => '',
                 'desc_tip'    => true,
                 'options'     => array(
                     'https://payment.glocashier.com/payment/page/v4/pay' => __( 'Production', 'woocommerce' ),
